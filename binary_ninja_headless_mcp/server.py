@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import socketserver
 import sys
 from copy import deepcopy
@@ -468,6 +469,12 @@ class SimpleMcpServer:
             is_error = True
 
         text = SimpleMcpServer._tool_summary_text(structured_payload, is_error=is_error)
+        # Opt-in: fold the full structuredContent into the text content block so
+        # text-only MCP clients (which ignore structuredContent) can read the
+        # actual payload. Off by default to preserve the compact-summary design.
+        if os.environ.get("BINARY_NINJA_HEADLESS_MCP_INLINE_STRUCTURED") == "1":
+            full = json.dumps(structured_payload, ensure_ascii=False, separators=(",", ":"))
+            text = f"{text}\n{full}" if text else full
         return {
             "content": [{"type": "text", "text": text}],
             "structuredContent": structured_payload,
