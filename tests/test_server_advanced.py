@@ -29,7 +29,7 @@ def _call_tool(
 def _open_rw(server: SimpleMcpServer, sample_binary_path: str, request_id: int) -> str:
     opened = _call_tool(
         server,
-        "session.open",
+        "session_open",
         {
             "path": sample_binary_path,
             "update_analysis": False,
@@ -64,82 +64,82 @@ def test_tools_list_includes_advanced_tools(real_server: SimpleMcpServer) -> Non
     assert listed is not None
     names = {tool["name"] for tool in listed["result"]["tools"]}
     expected = {
-        "type.parse_string",
-        "type.parse_declarations",
-        "type.define_user",
-        "type.rename",
-        "type.undefine_user",
-        "type.import_library_type",
-        "type.import_library_object",
-        "type.export_to_library",
-        "type_library.create",
-        "type_library.load",
-        "type_library.list",
-        "type_library.get",
-        "type_archive.create",
-        "type_archive.open",
-        "type_archive.list",
-        "type_archive.get",
-        "type_archive.pull",
-        "type_archive.push",
-        "type_archive.references",
-        "debug.parsers",
-        "debug.parse_and_apply",
-        "workflow.list",
-        "workflow.describe",
-        "workflow.clone",
-        "workflow.insert",
-        "workflow.insert_after",
-        "workflow.remove",
-        "workflow.graph",
-        "workflow.machine.status",
-        "workflow.machine.control",
-        "il.rewrite.capabilities",
-        "il.rewrite.noop_replace",
-        "il.rewrite.translate_identity",
-        "uidf.parse_possible_value",
-        "uidf.set_user_var_value",
-        "uidf.clear_user_var_value",
-        "uidf.list_user_var_values",
-        "loader.rebase",
-        "loader.load_settings_types",
-        "loader.load_settings_get",
-        "loader.load_settings_set",
-        "segment.add_user",
-        "segment.remove_user",
-        "section.add_user",
-        "section.remove_user",
-        "external.library_add",
-        "external.library_list",
-        "external.library_remove",
-        "external.location_add",
-        "external.location_get",
-        "external.location_remove",
-        "arch.info",
-        "arch.disasm_bytes",
-        "arch.assemble",
-        "transform.inspect",
-        "project.create",
-        "project.open",
-        "project.close",
-        "project.list",
-        "project.create_folder",
-        "project.create_file",
-        "project.metadata_store",
-        "project.metadata_query",
-        "project.metadata_remove",
-        "database.info",
-        "database.snapshots",
-        "database.read_global",
-        "database.write_global",
-        "plugin.valid_commands",
-        "plugin.execute",
-        "plugin_repo.status",
-        "plugin_repo.check_updates",
-        "plugin_repo.plugin_action",
-        "baseaddr.detect",
-        "baseaddr.reasons",
-        "baseaddr.abort",
+        "type_parse_string",
+        "type_parse_declarations",
+        "type_define_user",
+        "type_rename",
+        "type_undefine_user",
+        "type_import_library_type",
+        "type_import_library_object",
+        "type_export_to_library",
+        "type_library_create",
+        "type_library_load",
+        "type_library_list",
+        "type_library_get",
+        "type_archive_create",
+        "type_archive_open",
+        "type_archive_list",
+        "type_archive_get",
+        "type_archive_pull",
+        "type_archive_push",
+        "type_archive_references",
+        "debug_parsers",
+        "debug_parse_and_apply",
+        "workflow_list",
+        "workflow_describe",
+        "workflow_clone",
+        "workflow_insert",
+        "workflow_insert_after",
+        "workflow_remove",
+        "workflow_graph",
+        "workflow_machine_status",
+        "workflow_machine_control",
+        "il_rewrite_capabilities",
+        "il_rewrite_noop_replace",
+        "il_rewrite_translate_identity",
+        "uidf_parse_possible_value",
+        "uidf_set_user_var_value",
+        "uidf_clear_user_var_value",
+        "uidf_list_user_var_values",
+        "loader_rebase",
+        "loader_load_settings_types",
+        "loader_load_settings_get",
+        "loader_load_settings_set",
+        "segment_add_user",
+        "segment_remove_user",
+        "section_add_user",
+        "section_remove_user",
+        "external_library_add",
+        "external_library_list",
+        "external_library_remove",
+        "external_location_add",
+        "external_location_get",
+        "external_location_remove",
+        "arch_info",
+        "arch_disasm_bytes",
+        "arch_assemble",
+        "transform_inspect",
+        "project_create",
+        "project_open",
+        "project_close",
+        "project_list",
+        "project_create_folder",
+        "project_create_file",
+        "project_metadata_store",
+        "project_metadata_query",
+        "project_metadata_remove",
+        "database_info",
+        "database_snapshots",
+        "database_read_global",
+        "database_write_global",
+        "plugin_valid_commands",
+        "plugin_execute",
+        "plugin_repo_status",
+        "plugin_repo_check_updates",
+        "plugin_repo_plugin_action",
+        "baseaddr_detect",
+        "baseaddr_reasons",
+        "baseaddr_abort",
     }
     assert expected.issubset(names)
 
@@ -152,14 +152,14 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     session_id = _open_rw(real_server, sample_binary_path, request_id=10)
     _call_tool(
         real_server,
-        "analysis.update_and_wait",
+        "analysis_update_and_wait",
         {"session_id": session_id},
         request_id=11,
     )
 
     parsed = _call_tool(
         real_server,
-        "type.parse_string",
+        "type_parse_string",
         {"session_id": session_id, "type_source": "int mcp_type(int x);"},
         request_id=12,
     )
@@ -167,7 +167,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
 
     parsed_decls = _call_tool(
         real_server,
-        "type.parse_declarations",
+        "type_parse_declarations",
         {
             "session_id": session_id,
             "declarations": "typedef struct { int x; } mcp_s; int mcp_fn(int a);",
@@ -178,7 +178,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
 
     _call_tool(
         real_server,
-        "type.define_user",
+        "type_define_user",
         {
             "session_id": session_id,
             "type_source": "int mcp_defined_t;",
@@ -188,7 +188,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "type.rename",
+        "type_rename",
         {
             "session_id": session_id,
             "old_name": "mcp_defined_t",
@@ -198,7 +198,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "type.undefine_user",
+        "type_undefine_user",
         {"session_id": session_id, "name": "mcp_defined_t2"},
         request_id=16,
     )
@@ -206,7 +206,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     library_path = tmp_path / "server_types.bntl"
     created_library = _call_tool(
         real_server,
-        "type_library.create",
+        "type_library_create",
         {
             "session_id": session_id,
             "name": "mcp_lib",
@@ -219,7 +219,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
 
     exported = _call_tool(
         real_server,
-        "type.export_to_library",
+        "type_export_to_library",
         {
             "session_id": session_id,
             "type_library_id": type_library_id,
@@ -232,7 +232,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
 
     imported = _call_tool(
         real_server,
-        "type.import_library_type",
+        "type_import_library_type",
         {
             "session_id": session_id,
             "name": "mcp_lib_type",
@@ -244,7 +244,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
 
     _call_tool(
         real_server,
-        "type.import_library_object",
+        "type_import_library_object",
         {
             "session_id": session_id,
             "name": "mcp_lib_type",
@@ -256,7 +256,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     assert (
         _call_tool(
             real_server,
-            "type_library.list",
+            "type_library_list",
             {"session_id": session_id},
             request_id=21,
         )["count"]
@@ -264,13 +264,13 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "type_library.get",
+        "type_library_get",
         {"session_id": session_id, "type_library_id": type_library_id},
         request_id=22,
     )
     loaded_library = _call_tool(
         real_server,
-        "type_library.load",
+        "type_library_load",
         {
             "session_id": session_id,
             "path": str(library_path),
@@ -283,7 +283,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     archive_path = tmp_path / "server_types.bnta"
     created_archive = _call_tool(
         real_server,
-        "type_archive.create",
+        "type_archive_create",
         {"session_id": session_id, "path": str(archive_path), "attach": True},
         request_id=24,
     )
@@ -292,14 +292,14 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
 
     _call_tool(
         real_server,
-        "type_archive.open",
+        "type_archive_open",
         {"session_id": session_id, "path": str(archive_path), "attach": True},
         request_id=25,
     )
     assert (
         _call_tool(
             real_server,
-            "type_archive.list",
+            "type_archive_list",
             {"session_id": session_id},
             request_id=26,
         )["count"]
@@ -307,13 +307,13 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "type_archive.get",
+        "type_archive_get",
         {"session_id": session_id, "type_archive_id": type_archive_id},
         request_id=27,
     )
     _call_tool(
         real_server,
-        "type_archive.pull",
+        "type_archive_pull",
         {
             "session_id": session_id,
             "type_archive_id": type_archive_id,
@@ -323,7 +323,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "type_archive.push",
+        "type_archive_push",
         {
             "session_id": session_id,
             "type_archive_id": type_archive_id,
@@ -333,57 +333,57 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "type_archive.references",
+        "type_archive_references",
         {"type_archive_id": type_archive_id, "name": "mcp_lib_type"},
         request_id=30,
     )
 
     parsers = _call_tool(
         real_server,
-        "debug.parsers",
+        "debug_parsers",
         {"session_id": session_id},
         request_id=31,
     )
     assert parsers["count"] >= 1
     parsed_debug = _call_tool(
         real_server,
-        "debug.parse_and_apply",
+        "debug_parse_and_apply",
         {"session_id": session_id},
         request_id=32,
     )
     assert parsed_debug["applied"] is True
 
-    workflows = _call_tool(real_server, "workflow.list", request_id=33)
+    workflows = _call_tool(real_server, "workflow_list", request_id=33)
     assert workflows["count"] >= 1
     workflow_desc = _call_tool(
         real_server,
-        "workflow.describe",
+        "workflow_describe",
         {"session_id": session_id},
         request_id=34,
     )
     assert isinstance(workflow_desc["name"], str)
     _call_tool(
         real_server,
-        "workflow.graph",
+        "workflow_graph",
         {"session_id": session_id},
         request_id=35,
     )
     _call_tool(
         real_server,
-        "workflow.machine.status",
+        "workflow_machine_status",
         {"session_id": session_id},
         request_id=36,
     )
     _call_tool(
         real_server,
-        "workflow.machine.control",
+        "workflow_machine_control",
         {"session_id": session_id, "action": "dump"},
         request_id=37,
     )
     clone_name = f"mcp_clone_{uuid.uuid4().hex[:8]}"
     _call_tool(
         real_server,
-        "workflow.clone",
+        "workflow_clone",
         {"session_id": session_id, "name": clone_name},
         request_id=38,
     )
@@ -395,7 +395,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     if activity:
         _call_tool(
             real_server,
-            "workflow.insert",
+            "workflow_insert",
             {
                 "session_id": session_id,
                 "workflow_name": clone_name,
@@ -406,7 +406,7 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
         )
         _call_tool(
             real_server,
-            "workflow.insert_after",
+            "workflow_insert_after",
             {
                 "session_id": session_id,
                 "workflow_name": clone_name,
@@ -417,53 +417,53 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
         )
         _call_tool(
             real_server,
-            "workflow.remove",
+            "workflow_remove",
             {"session_id": session_id, "workflow_name": clone_name, "activity": activity},
             request_id=41,
         )
 
     functions = _call_tool(
         real_server,
-        "binary.functions",
+        "binary_functions",
         {"session_id": session_id, "offset": 0, "limit": 200},
         request_id=42,
     )
     main_start = _find_function_start(functions["items"], "main")
     _call_tool(
         real_server,
-        "il.rewrite.capabilities",
+        "il_rewrite_capabilities",
         {"session_id": session_id, "function_start": main_start, "level": "mlil"},
         request_id=43,
     )
     _call_tool(
         real_server,
-        "il.rewrite.noop_replace",
+        "il_rewrite_noop_replace",
         {"session_id": session_id, "function_start": main_start, "level": "mlil"},
         request_id=44,
     )
     _call_tool(
         real_server,
-        "il.rewrite.translate_identity",
+        "il_rewrite_translate_identity",
         {"session_id": session_id, "function_start": main_start, "level": "mlil"},
         request_id=45,
     )
 
     variables = _call_tool(
         real_server,
-        "function.variables",
+        "function_variables",
         {"session_id": session_id, "function_start": main_start},
         request_id=46,
     )
     first_var_name = variables["items"][0]["name"]
     _call_tool(
         real_server,
-        "uidf.parse_possible_value",
+        "uidf_parse_possible_value",
         {"session_id": session_id, "value": "0x2a", "state": "ConstantValue"},
         request_id=47,
     )
     _call_tool(
         real_server,
-        "uidf.set_user_var_value",
+        "uidf_set_user_var_value",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -476,13 +476,13 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "uidf.list_user_var_values",
+        "uidf_list_user_var_values",
         {"session_id": session_id, "function_start": main_start},
         request_id=49,
     )
     _call_tool(
         real_server,
-        "uidf.clear_user_var_value",
+        "uidf_clear_user_var_value",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -494,39 +494,39 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
 
     summary = _call_tool(
         real_server,
-        "binary.summary",
+        "binary_summary",
         {"session_id": session_id},
         request_id=51,
     )
     base = int(summary["end"], 16) + 0x2000
     _call_tool(
         real_server,
-        "segment.add_user",
+        "segment_add_user",
         {"session_id": session_id, "start": base, "length": 0x1000},
         request_id=52,
     )
     _call_tool(
         real_server,
-        "segment.remove_user",
+        "segment_remove_user",
         {"session_id": session_id, "start": base},
         request_id=53,
     )
     _call_tool(
         real_server,
-        "section.add_user",
+        "section_add_user",
         {"session_id": session_id, "name": ".mcpsec", "start": base, "length": 0x100},
         request_id=54,
     )
     _call_tool(
         real_server,
-        "section.remove_user",
+        "section_remove_user",
         {"session_id": session_id, "name": ".mcpsec"},
         request_id=55,
     )
 
     load_types = _call_tool(
         real_server,
-        "loader.load_settings_types",
+        "loader_load_settings_types",
         {"session_id": session_id},
         request_id=56,
     )
@@ -534,13 +534,13 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     load_type_name = load_types["items"][0]
     _call_tool(
         real_server,
-        "loader.load_settings_get",
+        "loader_load_settings_get",
         {"session_id": session_id, "type_name": load_type_name},
         request_id=57,
     )
     _call_tool(
         real_server,
-        "loader.load_settings_set",
+        "loader_load_settings_set",
         {
             "session_id": session_id,
             "type_name": load_type_name,
@@ -553,19 +553,19 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
 
     _call_tool(
         real_server,
-        "external.library_add",
+        "external_library_add",
         {"session_id": session_id, "name": "mcp_ext_lib"},
         request_id=59,
     )
     _call_tool(
         real_server,
-        "external.library_list",
+        "external_library_list",
         {"session_id": session_id},
         request_id=60,
     )
     _call_tool(
         real_server,
-        "external.location_add",
+        "external_location_add",
         {
             "session_id": session_id,
             "source_address": main_start,
@@ -576,39 +576,39 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "external.location_get",
+        "external_location_get",
         {"session_id": session_id, "source_address": main_start},
         request_id=62,
     )
     _call_tool(
         real_server,
-        "external.location_remove",
+        "external_location_remove",
         {"session_id": session_id, "source_address": main_start},
         request_id=63,
     )
     _call_tool(
         real_server,
-        "external.library_remove",
+        "external_library_remove",
         {"session_id": session_id, "name": "mcp_ext_lib"},
         request_id=64,
     )
 
-    _call_tool(real_server, "arch.info", {"session_id": session_id}, request_id=65)
+    _call_tool(real_server, "arch_info", {"session_id": session_id}, request_id=65)
     _call_tool(
         real_server,
-        "arch.disasm_bytes",
+        "arch_disasm_bytes",
         {"session_id": session_id, "data_hex": "9090", "address": 0x1000},
         request_id=66,
     )
     _call_tool(
         real_server,
-        "arch.assemble",
+        "arch_assemble",
         {"session_id": session_id, "asm": "nop", "address": 0x1000},
         request_id=67,
     )
     _call_tool(
         real_server,
-        "transform.inspect",
+        "transform_inspect",
         {"path": sample_binary_path, "mode": "full", "process": False},
         request_id=68,
     )
@@ -616,21 +616,21 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     project_path = tmp_path / "server_project"
     project = _call_tool(
         real_server,
-        "project.create",
+        "project_create",
         {"path": str(project_path), "name": "mcp-proj"},
         request_id=69,
     )
     project_id = project["project"]["project_id"]
-    _call_tool(real_server, "project.list", {"project_id": project_id}, request_id=70)
+    _call_tool(real_server, "project_list", {"project_id": project_id}, request_id=70)
     folder = _call_tool(
         real_server,
-        "project.create_folder",
+        "project_create_folder",
         {"project_id": project_id, "name": "docs"},
         request_id=71,
     )["folder"]
     _call_tool(
         real_server,
-        "project.create_file",
+        "project_create_file",
         {
             "project_id": project_id,
             "name": "note.txt",
@@ -641,34 +641,34 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "project.metadata_store",
+        "project_metadata_store",
         {"project_id": project_id, "key": "mcp.key", "value": {"v": 1}},
         request_id=73,
     )
     _call_tool(
         real_server,
-        "project.metadata_query",
+        "project_metadata_query",
         {"project_id": project_id, "key": "mcp.key"},
         request_id=74,
     )
     _call_tool(
         real_server,
-        "project.metadata_remove",
+        "project_metadata_remove",
         {"project_id": project_id, "key": "mcp.key"},
         request_id=75,
     )
-    _call_tool(real_server, "project.close", {"project_id": project_id}, request_id=76)
+    _call_tool(real_server, "project_close", {"project_id": project_id}, request_id=76)
 
     bndb_path = tmp_path / "server_hello.bndb"
     _call_tool(
         real_server,
-        "database.create_bndb",
+        "database_create_bndb",
         {"session_id": session_id, "path": str(bndb_path)},
         request_id=77,
     )
     bndb_session = _call_tool(
         real_server,
-        "session.open",
+        "session_open",
         {
             "path": str(bndb_path),
             "update_analysis": False,
@@ -679,69 +679,69 @@ def test_server_advanced_tool_calls_end_to_end(  # noqa: PLR0915
     )["session_id"]
     _call_tool(
         real_server,
-        "database.info",
+        "database_info",
         {"session_id": bndb_session},
         request_id=79,
     )
     _call_tool(
         real_server,
-        "database.snapshots",
+        "database_snapshots",
         {"session_id": bndb_session, "offset": 0, "limit": 20},
         request_id=80,
     )
     _call_tool(
         real_server,
-        "database.write_global",
+        "database_write_global",
         {"session_id": bndb_session, "key": "mcp.key", "value": "value"},
         request_id=81,
     )
     _call_tool(
         real_server,
-        "database.read_global",
+        "database_read_global",
         {"session_id": bndb_session, "key": "mcp.key"},
         request_id=82,
     )
 
     plugins = _call_tool(
         real_server,
-        "plugin.valid_commands",
+        "plugin_valid_commands",
         {"session_id": session_id},
         request_id=85,
     )
     if plugins["items"]:
         _call_tool(
             real_server,
-            "plugin.execute",
+            "plugin_execute",
             {"session_id": session_id, "name": plugins["items"][0]["name"]},
             request_id=86,
         )
 
-    _call_tool(real_server, "plugin_repo.status", request_id=87)
-    _call_tool(real_server, "plugin_repo.check_updates", request_id=88)
+    _call_tool(real_server, "plugin_repo_status", request_id=87)
+    _call_tool(real_server, "plugin_repo_check_updates", request_id=88)
 
     base_detect = _call_tool(
         real_server,
-        "baseaddr.detect",
+        "baseaddr_detect",
         {"session_id": session_id, "analysis": "basic"},
         request_id=89,
     )
     if base_detect["scores"]:
         _call_tool(
             real_server,
-            "baseaddr.reasons",
+            "baseaddr_reasons",
             {"session_id": session_id, "base_address": base_detect["scores"][0]["base_address"]},
             request_id=90,
         )
     _call_tool(
         real_server,
-        "baseaddr.abort",
+        "baseaddr_abort",
         {"session_id": session_id},
         request_id=91,
     )
 
     _call_tool(
         real_server,
-        "loader.rebase",
+        "loader_rebase",
         {"session_id": session_id, "address": summary["start"]},
         request_id=90,
     )

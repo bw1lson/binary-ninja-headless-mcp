@@ -33,7 +33,7 @@ def runner_for(tmp_path, monkeypatch, tool):
     )
 
 
-@pytest.mark.parametrize("tool", ["value.reg", "value.stack"])
+@pytest.mark.parametrize("tool", ["value_reg", "value_stack"])
 def test_before_only_does_not_cover_after_variant(tmp_path, monkeypatch, tool):
     runner = runner_for(tmp_path, monkeypatch, tool)
     runner.tool(
@@ -53,11 +53,11 @@ def test_before_only_does_not_cover_after_variant(tmp_path, monkeypatch, tool):
 @pytest.mark.parametrize(
     "tool",
     [
-        "binary.get_function_il_at",
-        "il.instruction_by_addr",
-        "il.address_to_index",
-        "il.index_to_address",
-        "value.possible",
+        "binary_get_function_il_at",
+        "il_instruction_by_addr",
+        "il_address_to_index",
+        "il_index_to_address",
+        "value_possible",
     ],
 )
 def test_il_manifest_requires_every_level_and_ssa_form(tool):
@@ -69,7 +69,7 @@ def test_il_manifest_requires_every_level_and_ssa_form(tool):
     "tool, required",
     [
         (
-            "plugin.execute",
+            "plugin_execute",
             {
                 "native-" + context
                 for context in (
@@ -89,7 +89,7 @@ def test_il_manifest_requires_every_level_and_ssa_form(tool):
             },
         ),
         (
-            "debug.parse_and_apply",
+            "debug_parse_and_apply",
             {"native-registered", "native-dwarf", "native-separate-debug"},
         ),
     ],
@@ -99,13 +99,13 @@ def test_manifest_requires_special_semantic_variants(tool, required):
 
 
 def test_readback_sequence_links_original_tool_invocation(tmp_path, monkeypatch):
-    tool = "session.set_mode"
-    catalog = {name: verify.CATALOG[name] for name in (tool, "session.mode")}
+    tool = "session_set_mode"
+    catalog = {name: verify.CATALOG[name] for name in (tool, "session_mode")}
     runner = runner_for(tmp_path, monkeypatch, tool)
     monkeypatch.setattr(verify, "CATALOG", catalog)
     runner.tool(tool, session_id="fixture", read_only=False)
     original_sequence = runner._sequence
-    runner.tool("session.mode", session_id="fixture")
+    runner.tool("session_mode", session_id="fixture")
     runner.record(tool, "False", True, "Readback occurs through another tool")
     assertion = runner.assertions[-1]
     assert assertion["invocation_sequence"] == original_sequence
@@ -113,7 +113,7 @@ def test_readback_sequence_links_original_tool_invocation(tmp_path, monkeypatch)
 
 
 def test_precondition_without_invocation_is_not_success(tmp_path, monkeypatch):
-    tool = "memory.insert"
+    tool = "memory_insert"
     runner = runner_for(tmp_path, monkeypatch, tool)
     runner.record(tool, "raw-fixture-database", True, "Fixture setup is only a precondition")
     entry = runner.summary()["ledger"][tool]

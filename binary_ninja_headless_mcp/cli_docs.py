@@ -6,7 +6,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .catalog import TOOL_DEFAULTS, TOOL_DEFINITIONS
+from .catalog import TOOL_DEFAULTS, TOOL_DEFINITIONS, tool_group
 
 START = "<!-- BEGIN GENERATED TOOL REFERENCE -->"
 END = "<!-- END GENERATED TOOL REFERENCE -->"
@@ -14,7 +14,7 @@ END = "<!-- END GENERATED TOOL REFERENCE -->"
 
 def render_reference() -> str:
     """Return deterministic Markdown containing every schema and effective default."""
-    groups = sorted({tool["name"].split(".", 1)[0] for tool in TOOL_DEFINITIONS})
+    groups = sorted({tool_group(tool["name"]) for tool in TOOL_DEFINITIONS})
     lines = [
         START,
         f"The catalog contains **{len(TOOL_DEFINITIONS)} tools across {len(groups)} groups**.",
@@ -31,7 +31,7 @@ def render_reference() -> str:
     for group in groups:
         lines.extend(["", f"### {group} tools", ""])
         for tool in sorted(TOOL_DEFINITIONS, key=lambda item: item["name"]):
-            if tool["name"].split(".", 1)[0] != group:
+            if tool_group(tool["name"]) != group:
                 continue
             lines.extend(
                 [

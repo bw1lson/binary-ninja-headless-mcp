@@ -18,7 +18,7 @@ def test_single_command_stdio_mode(sample_binary_path: str) -> None:
             "id": 2,
             "method": "tools/call",
             "params": {
-                "name": "session.open",
+                "name": "session_open",
                 "arguments": {"path": str(sample_path), "update_analysis": False},
             },
         },
@@ -72,7 +72,7 @@ def test_stdio_mode_background_server(sample_binary_path: str) -> None:
             "id": 2,
             "method": "tools/call",
             "params": {
-                "name": "session.open",
+                "name": "session_open",
                 "arguments": {"path": str(sample_path), "update_analysis": False},
             },
         }
@@ -80,7 +80,7 @@ def test_stdio_mode_background_server(sample_binary_path: str) -> None:
             "jsonrpc": "2.0",
             "id": 3,
             "method": "tools/call",
-            "params": {"name": "health.ping", "arguments": {}},
+            "params": {"name": "health_ping", "arguments": {}},
         }
 
         for request in (initialize, open_session, ping):
@@ -123,7 +123,7 @@ def test_stdio_binja_eval_print_does_not_corrupt_json_stream(sample_binary_path:
                 "id": 2,
                 "method": "tools/call",
                 "params": {
-                    "name": "session.open",
+                    "name": "session_open",
                     "arguments": {
                         "path": str(sample_path),
                         "update_analysis": False,
@@ -145,7 +145,7 @@ def test_stdio_binja_eval_print_does_not_corrupt_json_stream(sample_binary_path:
             "id": 3,
             "method": "tools/call",
             "params": {
-                "name": "binja.eval",
+                "name": "binja_eval",
                 "arguments": {
                     "session_id": session_id,
                     "code": "print('hello from eval') or 1",

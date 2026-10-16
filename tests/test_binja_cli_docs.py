@@ -80,7 +80,7 @@ def test_documented_client_examples(name, tmp_path):
     assert result.returncode == 0, result.stderr + result.stdout
     if name == "fake-batch":
         records = [json.loads(line) for line in result.stdout.splitlines()]
-        assert [record["tool"] for record in records] == ["session.open", "binary.functions"]
+        assert [record["tool"] for record in records] == ["session_open", "binary_functions"]
         assert all(record["isError"] is False for record in records)
 
 

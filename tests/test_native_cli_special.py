@@ -50,7 +50,7 @@ with contextlib.ExitStack() as stack:
     runner = Runner(Path(fixture), root, mode=mode, argument_style=style,
         server=server, endpoint=endpoint, env=dict(os.environ))
     try:
-        runner.tool("binja.eval", code="bn._init_plugins(); _ = True")
+        runner.tool("binja_eval", code="bn._init_plugins(); _ = True")
         with runner.isolated(options={"analysis.debugInfo.internal": False,
                                       "analysis.debugInfo.external": False}):
             run_special(runner, special)
@@ -89,9 +89,9 @@ def test_native_special_features(tmp_path: Path, mode: str, style: str):
         assert result.returncode == 0, result.stdout + "\n" + result.stderr
         assertions = json.loads((root / "special-result.json").read_text())
         variants = {(item["tool"], item["variant"]) for item in assertions if item["passed"]}
-        assert ("debug.parse_and_apply", "native-dwarf") in variants
-        assert ("plugin_repo.plugin_action", "restart-after-uninstall") in variants
-        assert ("debug.parse_and_apply", "native-separate-debug") in variants
+        assert ("debug_parse_and_apply", "native-dwarf") in variants
+        assert ("plugin_repo_plugin_action", "restart-after-uninstall") in variants
+        assert ("debug_parse_and_apply", "native-separate-debug") in variants
         for context in COMMANDS:
-            assert ("plugin.execute", "native-" + context) in variants
+            assert ("plugin_execute", "native-" + context) in variants
     assert not (special.user_directory / "license.dat").exists()

@@ -23,10 +23,10 @@ def run_cli(*arguments, env=None, stdin=None):
 
 
 def test_offline_catalog_and_module_version():
-    result = run_cli("list", "--prefix", "session.", "--names-only")
+    result = run_cli("list", "--prefix", "session_", "--names-only")
     assert result.returncode == 0, result.stderr
-    assert "session.open" in result.stdout.splitlines()
-    result = run_cli("describe", "workflow.insert")
+    assert "session_open" in result.stdout.splitlines()
+    result = run_cli("describe", "workflow_insert")
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)["inputSchema"]["properties"]["activities"]["type"] == [
         "array",
@@ -41,8 +41,8 @@ def test_fake_inprocess_batch_and_ephemeral_hint():
     payload = "\n".join(
         json.dumps(item)
         for item in [
-            {"tool": "session.open", "arguments": {"path": __file__}},
-            {"tool": "binary.summary"},
+            {"tool": "session_open", "arguments": {"path": __file__}},
+            {"tool": "binary_summary"},
         ]
     )
     result = run_cli("--fake-backend", "batch", "--close-after", stdin=payload)
@@ -51,7 +51,7 @@ def test_fake_inprocess_batch_and_ephemeral_hint():
     assert (
         items[0]["structuredContent"]["session_id"] == items[1]["structuredContent"]["session_id"]
     )
-    result = run_cli("--fake-backend", "call", "session.open", "--path", __file__)
+    result = run_cli("--fake-backend", "call", "session_open", "--path", __file__)
     assert result.returncode == 0, result.stderr
     assert "ephemeral" in result.stderr
 
@@ -69,11 +69,11 @@ def test_managed_cli_public_flow(tmp_path):
         assert result.returncode == 0, result.stderr
         original_pid = json.loads(result.stdout)["pid"]
         # No --fake-backend here: this must select the existing managed worker.
-        result = run_cli("call", "session.open", "--path", str(Path(__file__).resolve()), env=env)
+        result = run_cli("call", "session_open", "--path", str(Path(__file__).resolve()), env=env)
         assert result.returncode == 0, result.stderr
         session = json.loads(result.stdout)["session_id"]
         result = run_cli(
-            "--session-id", session, "--field", "session_id", "call", "binary.summary", env=env
+            "--session-id", session, "--field", "session_id", "call", "binary_summary", env=env
         )
         assert result.returncode == 0, result.stderr
         assert result.stdout.strip() == session
@@ -81,7 +81,7 @@ def test_managed_cli_public_flow(tmp_path):
             "--connect",
             f"127.0.0.1:{port}",
             "call",
-            "session.close",
+            "session_close",
             "--session-id",
             session,
             env=env,

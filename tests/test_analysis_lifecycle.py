@@ -143,11 +143,11 @@ def test_open_failure_returns_retained_session_id(backend, mode):
     sid, _ = open_view(backend)
     backend._bn.fail_on_load = True
     if mode == "file":
-        result = tool(backend, "session.open", path="failure")
+        result = tool(backend, "session_open", path="failure")
     elif mode == "bytes":
-        result = tool(backend, "session.open_bytes", data_base64=base64.b64encode(b"ELF").decode())
+        result = tool(backend, "session_open_bytes", data_base64=base64.b64encode(b"ELF").decode())
     else:
-        result = tool(backend, "session.open_existing", source_session_id=sid, update_analysis=True)
+        result = tool(backend, "session_open_existing", source_session_id=sid, update_analysis=True)
     assert result["isError"] is True
     payload = result["structuredContent"]
     assert payload["status"] == "failed"
@@ -175,11 +175,11 @@ def test_slow_open_is_registered_but_does_not_return_partial_result(backend):
 def test_async_alias_and_overlap_guard(backend):
     sid, view = open_view(backend)
     view.release.clear()
-    started = tool(backend, "analysis.update", session_id=sid)
+    started = tool(backend, "analysis_update", session_id=sid)
     assert started["isError"] is False
     task = started["structuredContent"]
     assert view.started.wait(5)
-    for name in ("analysis.update", "analysis.update_and_wait", "task.analysis_update"):
+    for name in ("analysis_update", "analysis_update_and_wait", "task_analysis_update"):
         rejected = tool(backend, name, session_id=sid)
         assert rejected["isError"] is True
         assert "already running" in rejected["structuredContent"]["error"]
@@ -212,7 +212,7 @@ def test_failed_task_result_is_terminal_envelope(backend):
     assert result["status"] == "failed"
     assert "native analysis failed" in result["error"]
     assert backend.task_status(task["task_id"])["result_ready"] is True
-    assert tool(backend, "task.result", task_id=task["task_id"])["isError"] is False
+    assert tool(backend, "task_result", task_id=task["task_id"])["isError"] is False
     view.fail = False
     assert backend.analysis_update_and_wait(sid)["status"] == "completed"
 
@@ -338,13 +338,13 @@ def test_close_timeout_retains_resources_and_allows_retry(backend, monkeypatch):
     view.abort_unblocks = False
     task = backend.analysis_update(sid)
     assert view.started.wait(5)
-    error = tool(backend, "session.close", session_id=sid)
+    error = tool(backend, "session_close", session_id=sid)
     assert error["isError"] is True
     assert error["structuredContent"]["status"] == "closing"
     assert not view.file.closed
-    assert tool(backend, "analysis.status", session_id=sid)["isError"] is False
-    assert tool(backend, "session.list")["isError"] is False
-    assert tool(backend, "analysis.update", session_id=sid)["isError"] is True
+    assert tool(backend, "analysis_status", session_id=sid)["isError"] is False
+    assert tool(backend, "session_list")["isError"] is False
+    assert tool(backend, "analysis_update", session_id=sid)["isError"] is True
     view.release.set()
     complete(backend, task)
     assert backend.close_session(sid)["closed"] is True
@@ -357,7 +357,7 @@ def test_close_waits_for_inflight_mcp_call(backend):
     release = threading.Event()
 
     def read():
-        with backend._operation_scope("binary.summary", {"session_id": sid}):
+        with backend._operation_scope("binary_summary", {"session_id": sid}):
             started.set()
             assert release.wait(5)
             assert not view.file.closed
@@ -377,7 +377,7 @@ def test_pending_result_is_error(backend):
     view.release.clear()
     task = backend.analysis_update(sid)
     assert view.started.wait(5)
-    response = tool(backend, "task.result", task_id=task["task_id"])
+    response = tool(backend, "task_result", task_id=task["task_id"])
     assert response["isError"] is True
     assert "not in a terminal state" in response["structuredContent"]["error"]
     view.release.set()
@@ -441,8 +441,8 @@ def test_shutdown_timeout_rejects_new_work_and_can_retry(backend, monkeypatch):
     with pytest.raises(BinjaBackendError, match="shutdown incomplete"):
         backend.shutdown()
     assert not view.file.closed
-    assert tool(backend, "session.open", path="new")["isError"] is True
-    assert tool(backend, "task.status", task_id=task["task_id"])["isError"] is False
+    assert tool(backend, "session_open", path="new")["isError"] is True
+    assert tool(backend, "task_status", task_id=task["task_id"])["isError"] is False
     view.release.set()
     complete(backend, task)
     backend.shutdown()
@@ -577,7 +577,7 @@ def test_reopened_upload_owns_backing_file_after_source_close(backend, fail_anal
     )["session_id"]
     path = Path(backend._get_record(parent).temp_path)
     backend._bn.fail_on_load = fail_analysis
-    result = tool(backend, "session.open_existing", source_session_id=parent, update_analysis=True)
+    result = tool(backend, "session_open_existing", source_session_id=parent, update_analysis=True)
     assert result["isError"] is fail_analysis
     child = result["structuredContent"]["session_id"]
     backend.close_session(parent)

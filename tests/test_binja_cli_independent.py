@@ -115,9 +115,9 @@ def test_batch_interrupt_closes_only_sessions_it_created():
     class Transport:
         def dispatch(self, method, params):
             calls.append((method, params))
-            if params["name"] == "session.open":
+            if params["name"] == "session_open":
                 return {"structuredContent": {"session_id": "owned"}}
-            if params["name"] == "health.ping":
+            if params["name"] == "health_ping":
                 raise KeyboardInterrupt
             return {"structuredContent": {"closed": True}}
 
@@ -125,13 +125,13 @@ def test_batch_interrupt_closes_only_sessions_it_created():
         session_id="borrowed", no_autosession=True, continue_on_error=False, close_after=True
     )
     stream = io.StringIO(
-        '{"tool":"session.open","args":{"path":"fixture"}}\n{"tool":"health.ping"}\n'
+        '{"tool":"session_open","args":{"path":"fixture"}}\n{"tool":"health_ping"}\n'
     )
     with pytest.raises(KeyboardInterrupt):
         cli._run_batch_lines(stream, args, Transport())
     assert calls[-1] == (
         "tools/call",
-        {"name": "session.close", "arguments": {"session_id": "owned"}},
+        {"name": "session_close", "arguments": {"session_id": "owned"}},
     )
     assert len(calls) == 3
 

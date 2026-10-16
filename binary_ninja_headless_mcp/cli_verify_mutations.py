@@ -27,7 +27,7 @@ def run_mutations(r):
         old_symbol = r.native("bv.get_symbol_by_raw_name('cli_add').address")
         target = old_start + 0x1000000
         r.verify(
-            "loader.rebase",
+            "loader_rebase",
             "relocate-native-image",
             {"session_id": r.session_id, "address": target},
             lambda p: p["rebased"] and int(p["start"], 16) == target,
@@ -35,14 +35,14 @@ def run_mutations(r):
         )
         shifted = r.native("bv.get_symbol_by_raw_name('cli_add').address")
         r.record(
-            "loader.rebase",
+            "loader_rebase",
             "symbol-delta",
             shifted == old_symbol + target - old_start,
             "Existing symbol moves by the exact rebase delta",
             shifted,
         )
         r.verify(
-            "loader.rebase",
+            "loader_rebase",
             "same-base-noop",
             {"session_id": r.session_id, "address": target},
             lambda p: p["rebased"] is False,
@@ -55,7 +55,7 @@ def _memory(r):
     address = r.symbols["cli_message"]
     original = r.native(f"bv.read({address}, 16).hex()")
     r.verify(
-        "memory.read",
+        "memory_read",
         "known-sentinel",
         {"session_id": sid, "address": address, "length": 16},
         lambda p: p["data_hex"] == b"BINJA_CLI_NATIVE_SENTINEL"[:16].hex(),
@@ -67,7 +67,7 @@ def _memory(r):
                 value = int.from_bytes(bytes(range(1, width + 1)), endian)
                 args = dict(session_id=sid, address=address, width=width, endian=endian)
                 r.verify(
-                    "memory.writer_write",
+                    "memory_writer_write",
                     f"{endian}-{width}",
                     {**args, "value": value},
                     lambda p, w=width: p["written"] and p["next_offset"] == address + w,
@@ -75,36 +75,36 @@ def _memory(r):
                 )
                 actual = r.native(f"bv.read({address}, {width}).hex()")
                 r.record(
-                    "memory.writer_write",
+                    "memory_writer_write",
                     f"{endian}-{width}-bytes",
                     actual == bytes(range(1, width + 1)).hex(),
                     "Native bytes match independently encoded integer",
                     actual,
                 )
                 r.verify(
-                    "memory.reader_read",
+                    "memory_reader_read",
                     f"{endian}-{width}",
                     args,
                     lambda p, v=value, w=width: p["value"] == v and p["next_offset"] == address + w,
                     "Reader returns written integer and advances by width",
                 )
         r.verify(
-            "memory.write",
+            "memory_write",
             "literal-bytes",
             {"session_id": sid, "address": address, "data_hex": "11223344"},
             lambda p: p["written"] == 4,
             "Exactly four bytes are written",
         )
         r.record(
-            "memory.write",
+            "memory_write",
             "native-readback",
             r.native(f"bv.read({address}, 4).hex()") == "11223344",
             "Native view contains all four supplied bytes",
         )
     finally:
-        r.tool("memory.write", session_id=sid, address=address, data_hex=original)
+        r.tool("memory_write", session_id=sid, address=address, data_hex=original)
     r.record(
-        "memory.write",
+        "memory_write",
         "restored",
         r.native(f"bv.read({address}, 16).hex()") == original,
         "Original fixture bytes restored",
@@ -123,13 +123,13 @@ def _raw_memory(r):
         "    raw.file.close()"
     )
     r.record(
-        "memory.insert",
+        "memory_insert",
         "raw-fixture-database",
         created,
         "A genuine Raw-only database is created as the mutable fixture",
     )
     opened = r.verify(
-        "session.open",
+        "session_open",
         "raw-only-database",
         dict(path=str(database), update_analysis=False, read_only=False),
         lambda p: p["view_type"] == "Raw" and p["end"] == "0x20",
@@ -138,14 +138,14 @@ def _raw_memory(r):
     sid = opened["session_id"]
     try:
         r.verify(
-            "memory.insert",
+            "memory_insert",
             "raw-view",
             dict(session_id=sid, address=4, data_hex="deadbeef"),
             lambda p: p["inserted"] == 4,
             "Raw view inserts four bytes",
         )
         r.verify(
-            "memory.read",
+            "memory_read",
             "raw-insertion-readback",
             dict(session_id=sid, address=0, length=36),
             lambda p: p["data_hex"] == (original[:4] + b"\xde\xad\xbe\xef" + original[4:]).hex(),
@@ -154,116 +154,116 @@ def _raw_memory(r):
         inserted = original[:4] + b"\xde\xad\xbe\xef" + original[4:]
         saved = database.with_suffix(".inserted.bin")
         r.verify(
-            "binary.save",
+            "binary_save",
             "raw-inserted-bytes",
             dict(session_id=sid, path=str(saved)),
             lambda p: p["saved"],
             "Raw byte insertion is saved to a standalone binary",
         )
         r.record(
-            "memory.insert",
+            "memory_insert",
             "persisted-file-readback",
             saved.read_bytes() == inserted,
             "Independent filesystem read proves saved insertion and tail contents",
         )
         r.verify(
-            "memory.remove",
+            "memory_remove",
             "raw-view",
             dict(session_id=sid, address=4, length=4),
             lambda p: p["removed"] == 4,
             "Raw view removes precisely the inserted bytes",
         )
         r.verify(
-            "memory.read",
+            "memory_read",
             "raw-removal-readback",
             dict(session_id=sid, address=0, length=32),
             lambda p: p["data_hex"] == original.hex(),
             "Removal restores the entire original raw buffer",
         )
     finally:
-        r.tool("session.close", session_id=sid)
+        r.tool("session_close", session_id=sid)
 
 
 def _annotations(r):
     sid, fn, data = r.session_id, r.function_start, r.symbols["cli_message"] + 8
     old_name = r.native(f"bv.get_function_at({fn}).name")
     r.verify(
-        "annotation.rename_function",
+        "annotation_rename_function",
         "rename-and-readback",
         dict(session_id=sid, function_start=fn, new_name="cli_renamed_function"),
         lambda p: p["function"]["name"] == "cli_renamed_function",
         "Function result carries new name",
     )
     r.record(
-        "annotation.rename_function",
+        "annotation_rename_function",
         "native-readback",
         r.native(f"bv.get_function_at({fn}).name") == "cli_renamed_function",
         "Native function has new name",
     )
-    r.tool("annotation.rename_function", session_id=sid, function_start=fn, new_name=old_name)
+    r.tool("annotation_rename_function", session_id=sid, function_start=fn, new_name=old_name)
     r.verify(
-        "annotation.define_symbol",
+        "annotation_define_symbol",
         "new-data-symbol",
         dict(session_id=sid, address=data, name="cli_user_symbol", symbol_type="DataSymbol"),
         lambda p: p["symbol"]["name"] == "cli_user_symbol",
         "A user symbol is defined",
     )
     r.verify(
-        "annotation.rename_symbol",
+        "annotation_rename_symbol",
         "rename-user-symbol",
         dict(session_id=sid, address=data, new_name="cli_renamed_symbol"),
         lambda p: p["symbol"]["name"] == "cli_renamed_symbol",
         "Symbol result carries new name",
     )
     r.record(
-        "annotation.rename_symbol",
+        "annotation_rename_symbol",
         "native-readback",
         r.native(f"bv.get_symbol_at({data}).name") == "cli_renamed_symbol",
         "Native symbol has renamed value",
     )
     r.verify(
-        "annotation.undefine_symbol",
+        "annotation_undefine_symbol",
         "remove-user-symbol",
         dict(session_id=sid, address=data),
         lambda p: p["undefined"],
         "User symbol removal reports success",
     )
     r.record(
-        "annotation.undefine_symbol",
+        "annotation_undefine_symbol",
         "native-readback",
         r.native(f"bv.get_symbol_at({data}) is None"),
         "Native symbol was actually removed",
     )
     for kind, width in (("char", 1), ("int", 4), ("pointer", 8)):
         r.verify(
-            "annotation.define_data_var",
+            "annotation_define_data_var",
             kind,
             dict(session_id=sid, address=data, type_name=kind, width=width, name="cli_data"),
             lambda p: p["data_var"]["name"] == "cli_data",
             "Named user data variable is defined",
         )
         r.record(
-            "annotation.define_data_var",
+            "annotation_define_data_var",
             kind + "-native-width",
             r.native(f"bv.get_data_var_at({data}).type.width") == width,
             "Native data type has requested width",
         )
         r.verify(
-            "annotation.rename_data_var",
+            "annotation_rename_data_var",
             kind,
             dict(session_id=sid, address=data, new_name="cli_data_renamed"),
             lambda p: p["data_var"]["name"] == "cli_data_renamed",
             "Data variable has requested name",
         )
         r.verify(
-            "annotation.undefine_data_var",
+            "annotation_undefine_data_var",
             kind,
             dict(session_id=sid, address=data),
             lambda p: p["undefined"],
             "User data variable removal reports success",
         )
         r.record(
-            "annotation.undefine_data_var",
+            "annotation_undefine_data_var",
             kind + "-native-absent",
             r.native(
                 f"bv.get_data_var_at({data}) is None or bv.get_data_var_at({data}).auto_discovered"
@@ -272,27 +272,27 @@ def _annotations(r):
         )
     comment = 'CLI native comment: quotes " and Unicode λ\nsecond line'
     r.verify(
-        "annotation.set_comment",
+        "annotation_set_comment",
         "unicode-multiline",
         dict(session_id=sid, address=fn, comment=comment),
         lambda p: p["comment"] == comment,
         "Comments preserve Unicode, quotes, and newlines",
     )
     r.verify(
-        "annotation.get_comment",
+        "annotation_get_comment",
         "readback",
         dict(session_id=sid, address=fn),
         lambda p: p["comment"] == comment,
         "Independent get returns exact comment",
     )
     r.verify(
-        "annotation.set_comment",
+        "annotation_set_comment",
         "clear",
         dict(session_id=sid, address=fn, comment=""),
         lambda p: p["comment"] == "",
         "Empty comment clears native annotation",
     )
-    for tool in ("annotation.add_tag", "annotation.get_tags"):
+    for tool in ("annotation_add_tag", "annotation_get_tags"):
         args = dict(session_id=sid, address=fn)
         if tool.endswith("add_tag"):
             args.update(tag_type="CLI native check", data="cli-tag-value", icon="C")
@@ -310,7 +310,7 @@ def _annotations(r):
 
 def _metadata(r):
     values = ("native text λ", 17, True, 1.25, [1, "two", False], {"nested": [1, 2], "flag": True})
-    for prefix in ("metadata.", "function.metadata_"):
+    for prefix in ("metadata_", "function_metadata_"):
         args = dict(session_id=r.session_id, key="cli.native.verification")
         if prefix.startswith("function"):
             args["function_start"] = r.function_start
@@ -348,25 +348,25 @@ def _metadata(r):
 def _undo(r):
     args = dict(session_id=r.session_id)
     address = r.function_start
-    r.tool("annotation.set_comment", **args, address=address, comment="before transaction")
+    r.tool("annotation_set_comment", **args, address=address, comment="before transaction")
     transaction = r.verify(
-        "undo.begin",
+        "undo_begin",
         "begin",
         args,
         lambda p: bool(p["transaction_id"]),
         "Begin returns a native transaction identifier",
     )["transaction_id"]
-    r.tool("annotation.set_comment", **args, address=address, comment="committed transaction")
+    r.tool("annotation_set_comment", **args, address=address, comment="committed transaction")
     r.verify(
-        "undo.commit",
+        "undo_commit",
         "commit",
         {**args, "transaction_id": transaction},
         lambda p: p["committed"],
         "Commit accepts returned transaction identifier",
     )
     for tool, expected in (
-        ("undo.undo", "before transaction"),
-        ("undo.redo", "committed transaction"),
+        ("undo_undo", "before transaction"),
+        ("undo_redo", "committed transaction"),
     ):
         r.tool(tool, **args)
         r.record(
@@ -376,17 +376,17 @@ def _undo(r):
             "Native comment matches expected transaction state",
             expected,
         )
-    transaction = r.tool("undo.begin", **args)["transaction_id"]
-    r.tool("annotation.set_comment", **args, address=address, comment="uncommitted")
+    transaction = r.tool("undo_begin", **args)["transaction_id"]
+    r.tool("annotation_set_comment", **args, address=address, comment="uncommitted")
     r.verify(
-        "undo.revert",
+        "undo_revert",
         "revert-open-transaction",
         {**args, "transaction_id": transaction},
         lambda p: p["reverted"],
         "Revert accepts an open transaction",
     )
     r.record(
-        "undo.revert",
+        "undo_revert",
         "native-comment-state",
         r.native(f"bv.get_comment_at({address})") == "committed transaction",
         "Revert restores state before open transaction",
@@ -404,7 +404,7 @@ def _patches(r):
     }""")
     branch, call = sites["branch"], sites["call"]
     r.verify(
-        "patch.status",
+        "patch_status",
         "conditional-branch",
         dict(session_id=r.session_id, address=branch),
         lambda p: p["is_always_branch_patch_available"] and p["is_invert_branch_patch_available"],
@@ -435,7 +435,7 @@ def _patches(r):
             )
         try:
             r.verify(
-                "patch." + name,
+                "patch_" + name,
                 "native-transform",
                 args,
                 lambda p: p.get("patched", p.get("written", 0) > 0),
@@ -443,16 +443,16 @@ def _patches(r):
             )
             actual = r.native(f"bv.read({address}, {len(expected) // 2}).hex()")
             r.record(
-                "patch." + name,
+                "patch_" + name,
                 "independent-native-bytes",
                 actual == expected and actual != original[: len(actual)],
                 "Patched bytes match architecture transform and differ from original",
                 actual,
             )
         finally:
-            r.tool("memory.write", session_id=r.session_id, address=address, data_hex=original)
+            r.tool("memory_write", session_id=r.session_id, address=address, data_hex=original)
         r.record(
-            "patch." + name,
+            "patch_" + name,
             "restored-original-bytes",
             r.native(f"bv.read({address}, 32).hex()") == original,
             "Original instruction bytes restored",
@@ -463,7 +463,7 @@ def _segments(r):
     start = (r.native("bv.end") + 0x1FFFF) & ~0xFFFF
     args = dict(session_id=r.session_id)
     r.verify(
-        "segment.add_user",
+        "segment_add_user",
         "new-mapping",
         {
             **args,
@@ -477,7 +477,7 @@ def _segments(r):
         "Requested user segment exists",
     )
     r.record(
-        "segment.add_user",
+        "segment_add_user",
         "native-flags",
         r.native(
             f"(bv.get_segment_at({start}).writable and not bv.get_segment_at({start}).executable)"
@@ -485,7 +485,7 @@ def _segments(r):
         "Native mapping preserves writable/nonexecutable flags",
     )
     r.verify(
-        "section.add_user",
+        "section_add_user",
         "named-section",
         {
             **args,
@@ -501,27 +501,27 @@ def _segments(r):
         "Section preserves name and alignment",
     )
     r.verify(
-        "section.remove_user",
+        "section_remove_user",
         "remove",
         {**args, "name": ".cli_native"},
         lambda p: p["removed"],
         "Section removal reports success",
     )
     r.record(
-        "section.remove_user",
+        "section_remove_user",
         "native-absent",
         r.native("bv.get_section_by_name('.cli_native') is None"),
         "Native section is absent",
     )
     r.verify(
-        "segment.remove_user",
+        "segment_remove_user",
         "remove",
         {**args, "start": start, "length": 4096},
         lambda p: p["removed"],
         "Segment removal reports success",
     )
     r.record(
-        "segment.remove_user",
+        "segment_remove_user",
         "native-absent",
         r.native(f"bv.get_segment_at({start}) is None"),
         "Native segment is absent",
@@ -535,21 +535,21 @@ def _external(r):
         library = f"cli_native_library_{auto}"
         variant = "auto" if auto else "user"
         r.verify(
-            "external.library_add",
+            "external_library_add",
             variant,
             {**args, "name": library, "auto": auto},
             lambda p, lib=library: p["external_library"]["name"] == lib,
             "Requested external library is returned",
         )
         r.verify(
-            "external.library_list",
+            "external_library_list",
             variant,
             args,
             lambda p, lib=library: any(x["name"] == lib for x in p["items"]),
             "Native library list includes added library",
         )
         r.verify(
-            "external.location_add",
+            "external_location_add",
             variant,
             {
                 **args,
@@ -566,35 +566,35 @@ def _external(r):
             "Location has requested symbol and target address",
         )
         r.verify(
-            "external.location_get",
+            "external_location_get",
             variant,
             {**args, "source_address": address},
             lambda p, lib=library: p["external_location"]["external_library"] == lib,
             "Separate lookup preserves external library association",
         )
         r.verify(
-            "external.location_remove",
+            "external_location_remove",
             variant,
             {**args, "source_address": address},
             lambda p: p["removed"],
             "External location removal reports success",
         )
         r.verify(
-            "external.location_get",
+            "external_location_get",
             variant + "-removed",
             {**args, "source_address": address},
             lambda p: p["external_location"] is None,
             "Removed location is absent",
         )
         r.verify(
-            "external.library_remove",
+            "external_library_remove",
             variant,
             {**args, "name": library},
             lambda p: p["removed"],
             "External library removal reports success",
         )
         r.record(
-            "external.library_remove",
+            "external_library_remove",
             variant + "-native-absent",
             r.native(f"bv.get_external_library({library!r}) is None"),
             "Native library is absent",
@@ -621,7 +621,7 @@ def _load_settings(r):
     )
     args = dict(session_id=r.session_id)
     r.verify(
-        "loader.load_settings_types",
+        "loader_load_settings_types",
         "registered-native-settings",
         args,
         lambda p: "CLI Native" in p["items"],
@@ -635,7 +635,7 @@ def _load_settings(r):
         ("json", "list", '["three", "four"]', "get_string_list", ["three", "four"]),
     ):
         r.verify(
-            "loader.load_settings_set",
+            "loader_load_settings_set",
             value_type,
             {
                 **args,
@@ -649,14 +649,14 @@ def _load_settings(r):
         )
         actual = r.native(f"bv.get_load_settings('CLI Native').{getter}('cli.{key}', resource=bv)")
         r.record(
-            "loader.load_settings_set",
+            "loader_load_settings_set",
             value_type + "-native-readback",
             actual == expected,
             "Independent native getter returns exact typed value",
             actual,
         )
     r.verify(
-        "loader.load_settings_get",
+        "loader_load_settings_get",
         "serialized-readback",
         {**args, "type_name": "CLI Native"},
         lambda p: "cli.text" in p["keys"] and bool(json.loads(p["serialized_settings"])),
@@ -668,7 +668,7 @@ def _types(r):
     args = dict(session_id=r.session_id)
     for dependencies in (False, True):
         r.verify(
-            "type.parse_string",
+            "type_parse_string",
             f"dependencies-{dependencies}",
             {
                 **args,
@@ -683,7 +683,7 @@ def _types(r):
         "extern CliParsedRecord cli_parsed_global; int cli_parsed_function(CliParsedRecord *value);"
     )
     r.verify(
-        "type.parse_declarations",
+        "type_parse_declarations",
         "types-variables-functions",
         {
             **args,
@@ -711,7 +711,7 @@ def _types(r):
         if explicit:
             define["name"] = name
         r.verify(
-            "type.define_user",
+            "type_define_user",
             "explicit-name" if explicit else "inferred-name",
             define,
             lambda p, n=name: p["defined"] and p["name"] == n,
@@ -721,7 +721,7 @@ def _types(r):
             f"[(m.name, m.offset, m.type.width) for m in bv.get_type_by_name({name!r}).members]"
         )
         r.record(
-            "type.define_user",
+            "type_define_user",
             name + "-native-layout",
             observed == [["count", 0, 4], ["bytes", 4, 4]],
             "Native structure members preserve names, offsets, and widths",
@@ -729,14 +729,14 @@ def _types(r):
         )
         renamed = name + "Renamed"
         r.verify(
-            "type.rename",
+            "type_rename",
             name,
             {**args, "old_name": name, "new_name": renamed},
             lambda p: p["renamed"],
             "Rename reports success",
         )
         r.record(
-            "type.rename",
+            "type_rename",
             name + "-native-lookup",
             r.native(
                 f"bv.get_type_by_name({name!r}) is None and "
@@ -745,14 +745,14 @@ def _types(r):
             "Old type name disappears and new name retains structure layout",
         )
         r.verify(
-            "type.undefine_user",
+            "type_undefine_user",
             name,
             {**args, "name": renamed},
             lambda p: p["undefined"],
             "Undefine reports success",
         )
         r.record(
-            "type.undefine_user",
+            "type_undefine_user",
             name + "-native-absent",
             r.native(f"bv.get_type_by_name({renamed!r}) is None"),
             "Native type lookup confirms removal",

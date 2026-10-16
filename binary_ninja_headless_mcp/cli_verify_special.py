@@ -301,7 +301,7 @@ def _run_plugin_contexts(runner, special: SpecialFixtures) -> None:
     sid = runner.session_id
     address = runner.function_start
     runner.verify(
-        "plugin.valid_commands",
+        "plugin_valid_commands",
         "registered-native-contexts",
         {"session_id": sid},
         lambda p: set(COMMANDS.values()) <= {item["name"] for item in p["items"]},
@@ -337,7 +337,7 @@ def _run_plugin_contexts(runner, special: SpecialFixtures) -> None:
                     f"{{'start': {il}.source_function.start, 'class': type({il}).__name__}}"
                 )
         runner.verify(
-            "plugin.execute",
+            "plugin_execute",
             "native-" + kind,
             arguments,
             lambda p, k=kind, expected=marker: (
@@ -349,7 +349,7 @@ def _run_plugin_contexts(runner, special: SpecialFixtures) -> None:
     global_marker = special.user_directory / "global-command-executed"
     global_marker.unlink(missing_ok=True)
     runner.verify(
-        "plugin.execute",
+        "plugin_execute",
         "native-global",
         {"session_id": sid, "name": COMMANDS["global"], "perform": True},
         lambda p: p["executed"] and global_marker.read_text() == "executed",
@@ -360,7 +360,7 @@ def _run_plugin_contexts(runner, special: SpecialFixtures) -> None:
 def _run_project_command(runner) -> None:
     """Open a project-backed file through the existing path-based session API."""
     created = runner.tool(
-        "project.create",
+        "project_create",
         path=str(runner.output / "native-plugin-project.bnpr"),
         name="Native project command fixture",
     )
@@ -369,26 +369,26 @@ def _run_project_command(runner) -> None:
     project_sid = None
     try:
         file = runner.tool(
-            "project.create_file",
+            "project_create_file",
             project_id=project_id,
             name=runner.fixture.name,
             data_base64=base64.b64encode(runner.fixture.read_bytes()).decode("ascii"),
         )["file"]
         project_sid = runner.tool(
-            "session.open",
+            "session_open",
             path=file["path_on_disk"],
             read_only=False,
             options={"analysis.debugInfo.internal": False, "analysis.debugInfo.external": False},
         )["session_id"]
         runner.session_id = project_sid
         runner.record(
-            "session.open",
+            "session_open",
             "native-project-context",
             runner.native("bv.project is not None and bv.project_file is not None"),
             "Opening a known project file path naturally retains its native project association",
         )
         runner.verify(
-            "plugin.execute",
+            "plugin_execute",
             "native-project",
             {"session_id": project_sid, "name": COMMANDS["project"], "perform": True},
             lambda p: (
@@ -402,8 +402,8 @@ def _run_project_command(runner) -> None:
     finally:
         runner.session_id = old_sid
         if project_sid is not None:
-            runner.tool("session.close", session_id=project_sid)
-        runner.tool("project.close", project_id=project_id)
+            runner.tool("session_close", session_id=project_sid)
+        runner.tool("project_close", project_id=project_id)
 
 
 def _run_separate_debug(runner, special: SpecialFixtures, dwarf: str) -> None:
@@ -438,14 +438,14 @@ def _run_separate_debug(runner, special: SpecialFixtures, dwarf: str) -> None:
     separate_sid = None
     try:
         separate_sid = runner.tool(
-            "session.open",
+            "session_open",
             path=str(stripped),
             read_only=False,
             options={"analysis.debugInfo.internal": False, "analysis.debugInfo.external": False},
         )["session_id"]
         runner.session_id = separate_sid
         runner.record(
-            "debug.parse_and_apply",
+            "debug_parse_and_apply",
             "separate-debug-before-apply",
             runner.native(
                 "bv.get_type_by_name('cli_pair') is None "
@@ -454,7 +454,7 @@ def _run_separate_debug(runner, special: SpecialFixtures, dwarf: str) -> None:
             "Stripped target has neither the fixture structure nor the local function name",
         )
         runner.verify(
-            "debug.parse_and_apply",
+            "debug_parse_and_apply",
             "native-separate-debug",
             {"session_id": separate_sid, "parser_name": dwarf, "debug_path": str(debug)},
             lambda p: (
@@ -470,7 +470,7 @@ def _run_separate_debug(runner, special: SpecialFixtures, dwarf: str) -> None:
     finally:
         runner.session_id = old_sid
         if separate_sid is not None:
-            runner.tool("session.close", session_id=separate_sid)
+            runner.tool("session_close", session_id=separate_sid)
 
 
 def run_special(runner, special: SpecialFixtures) -> None:
@@ -479,14 +479,14 @@ def run_special(runner, special: SpecialFixtures) -> None:
     _run_plugin_contexts(runner, special)
     runner.native("bv.store_metadata('cli.fixture.debug.enabled', True)")
     runner.verify(
-        "debug.parsers",
+        "debug_parsers",
         "native-registered",
         {"session_id": sid},
         lambda p: PARSER in {item["name"] for item in p["items"]},
         "Registered native parser is valid for marked view",
     )
     runner.verify(
-        "debug.parse_and_apply",
+        "debug_parse_and_apply",
         "native-registered",
         {
             "session_id": sid,
@@ -500,20 +500,20 @@ def run_special(runner, special: SpecialFixtures) -> None:
     )
     # Actual DWARF parser in addition to deterministic registration. The caller
     # compiles its controlled fixture with -g and opens it with debugInfo disabled.
-    parsers = runner.tool("debug.parsers", session_id=sid)
+    parsers = runner.tool("debug_parsers", session_id=sid)
     dwarf = next(
         (item["name"] for item in parsers["items"] if "dwarf" in item["name"].lower()), None
     )
     if dwarf is None:
         raise AssertionError("The live debug fixture has no native DWARF parser")
     runner.record(
-        "debug.parse_and_apply",
+        "debug_parse_and_apply",
         "dwarf-before-apply",
         runner.native("bv.get_type_by_name('cli_pair') is None"),
         "Automatic debug loading disabled; fixture structure absent before DWARF",
     )
     runner.verify(
-        "debug.parse_and_apply",
+        "debug_parse_and_apply",
         "native-dwarf",
         {
             "session_id": sid,
@@ -531,7 +531,7 @@ def run_special(runner, special: SpecialFixtures) -> None:
     )
     _run_separate_debug(runner, special, dwarf)
     runner.verify(
-        "plugin_repo.check_updates",
+        "plugin_repo_check_updates",
         "native-localhost",
         {"perform": True},
         lambda p: (
@@ -542,7 +542,7 @@ def run_special(runner, special: SpecialFixtures) -> None:
         "Native repository manager fetched controlled localhost metadata",
     )
     runner.verify(
-        "plugin_repo.status",
+        "plugin_repo_status",
         "native-localhost",
         {},
         lambda p: any(
@@ -577,7 +577,7 @@ def run_special(runner, special: SpecialFixtures) -> None:
             return state["delete_pending"] or not state["installed"]
 
         runner.verify(
-            "plugin_repo.plugin_action",
+            "plugin_repo_plugin_action",
             "native-" + action,
             {
                 "repository_path": REPOSITORY,
@@ -593,7 +593,7 @@ def run_special(runner, special: SpecialFixtures) -> None:
             if action == "uninstall":
                 passed = passed and not state["installed"] and not state["delete_pending"]
             runner.record(
-                "plugin_repo.plugin_action",
+                "plugin_repo_plugin_action",
                 "restart-after-" + action,
                 passed,
                 "Deferred native change survives a fresh core process",

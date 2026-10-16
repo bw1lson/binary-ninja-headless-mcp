@@ -128,7 +128,7 @@ def test_native_noncompletion_cannot_report_success(
         result = complete(backend, backend.analysis_update(sid))
         assert result["status"] == "failed"
     else:
-        result = tool(backend, "analysis.update_and_wait", session_id=sid)
+        result = tool(backend, "analysis_update_and_wait", session_id=sid)
         assert result["isError"]
         assert result["structuredContent"]["status"] == "failed"
     assert backend.analysis_status(sid)["status"] == "failed"
@@ -143,7 +143,7 @@ def test_raw_context_leases_sessions_published_after_outer_admission(backend):
     backend.open_session("old", update_analysis=False)
 
     def evaluate():
-        with backend._operation_scope("binja.eval", {}):
+        with backend._operation_scope("binja_eval", {}):
             outer_entered.set()
             assert build_context.wait(5)
             return backend.eval_code(
@@ -168,7 +168,7 @@ def test_raw_context_leases_sessions_published_after_outer_admission(backend):
         closing.result(timeout=5)
 
 
-@pytest.mark.parametrize("operation", ["analysis.update_and_wait", "binary.summary"])
+@pytest.mark.parametrize("operation", ["analysis_update_and_wait", "binary_summary"])
 def test_rebase_rejects_active_analysis_and_readers(backend, operation):
     sid, view = open_view(backend)
     backend.set_session_mode(sid, read_only=False)
@@ -178,7 +178,7 @@ def test_rebase_rejects_active_analysis_and_readers(backend, operation):
 
     def admitted():
         with backend._operation_scope(operation, {"session_id": sid}):
-            if operation == "analysis.update_and_wait":
+            if operation == "analysis_update_and_wait":
                 return backend.analysis_update_and_wait(sid)
             entered.set()
             assert release.wait(5)
@@ -187,8 +187,8 @@ def test_rebase_rejects_active_analysis_and_readers(backend, operation):
     with ThreadPoolExecutor() as pool:
         active = pool.submit(admitted)
         try:
-            assert (view.started if operation == "analysis.update_and_wait" else entered).wait(5)
-            rebased = tool(backend, "loader.rebase", session_id=sid, address="0x800000")
+            assert (view.started if operation == "analysis_update_and_wait" else entered).wait(5)
+            rebased = tool(backend, "loader_rebase", session_id=sid, address="0x800000")
             assert rebased["isError"]
             assert not view.closed_while_active
             assert not view.file.closed
@@ -211,10 +211,10 @@ def test_rebase_blocks_new_calls_and_close_drains_replacement(backend):
 
     view.rebase = rebase
     with ThreadPoolExecutor() as pool:
-        rebasing = pool.submit(tool, backend, "loader.rebase", session_id=sid, address="0x800000")
+        rebasing = pool.submit(tool, backend, "loader_rebase", session_id=sid, address="0x800000")
         try:
             assert entered.wait(5)
-            for name in ("analysis.update", "analysis.update_and_wait", "binary.functions"):
+            for name in ("analysis_update", "analysis_update_and_wait", "binary_functions"):
                 assert tool(backend, name, session_id=sid)["isError"]
             assert backend.analysis_status(sid)["replacing"]
             assert backend.list_sessions()["sessions"][0]["replacing"]

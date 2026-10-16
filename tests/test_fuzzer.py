@@ -37,10 +37,10 @@ def test_feature_fuzzer_runs_with_fake_backend(tmp_path: Path) -> None:
     assert report["successful_tools"] >= 1
 
     unattempted = set(report["unattempted_tools"])
-    assert "binary.save" not in unattempted
-    assert "binary.get_function_disassembly_at" not in unattempted
-    assert "binary.get_function_il_at" not in unattempted
-    assert "disasm.function" not in unattempted
+    assert "binary_save" not in unattempted
+    assert "binary_get_function_disassembly_at" not in unattempted
+    assert "binary_get_function_il_at" not in unattempted
+    assert "disasm_function" not in unattempted
 
 
 def test_old_task_metadata_does_not_resurrect_closed_session(tmp_path):
@@ -56,12 +56,12 @@ def test_old_task_metadata_does_not_resurrect_closed_session(tmp_path):
         SimpleMcpServer(backend), sample, iterations=0, seed=0, update_analysis=False, verbose=False
     )
     try:
-        fuzzer._invoke("session.open", {"path": str(sample), "update_analysis": False})
+        fuzzer._invoke("session_open", {"path": str(sample), "update_analysis": False})
         sid = fuzzer._state.active_session_id
         task = backend.analysis_update(sid)
         backend._get_task(task["task_id"]).worker_future.result(timeout=5)
-        fuzzer._invoke("session.close", {"session_id": sid})
-        fuzzer._invoke("task.status", {"task_id": task["task_id"]})
+        fuzzer._invoke("session_close", {"session_id": sid})
+        fuzzer._invoke("task_status", {"task_id": task["task_id"]})
         assert sid not in fuzzer._state.session_ids
     finally:
         backend.shutdown()
@@ -84,13 +84,13 @@ def test_register_argument_respects_schema(tmp_path):
         fuzzer._state.register_names.add("x0")
         assert (
             fuzzer._value_for_field(
-                "workflow.clone", "register", {"type": "boolean"}, required=True
+                "workflow_clone", "register", {"type": "boolean"}, required=True
             )
             is False
         )
         assert (
             fuzzer._value_for_field(
-                "value.register_at", "register", {"type": "string"}, required=True
+                "value_register_at", "register", {"type": "string"}, required=True
             )
             == "x0"
         )
@@ -118,12 +118,12 @@ def test_ssa_variable_probe_uses_same_function_with_available_il(tmp_path, monke
 
         def query(name, arguments):
             assert arguments["session_id"] == "active"
-            if name == "il.function":
+            if name == "il_function":
                 assert arguments["ssa"] is True
                 if arguments["function_start"] == 0x1000:
                     return True, {"error": "mlil is not available for this function"}, ""
                 return False, {"items": [{"address": "0x2000"}]}, ""
-            assert name == "function.variables"
+            assert name == "function_variables"
             assert arguments["function_start"] == 0x2000
             return False, {"items": [{"name": "arg2"}]}, ""
 
@@ -135,7 +135,7 @@ def test_ssa_variable_probe_uses_same_function_with_available_il(tmp_path, monke
                 "properties": {"version": {"type": "integer"}},
             }
         }
-        arguments = fuzzer._build_arguments("function.ssa_var_def_use", definition, fuzz=False)
+        arguments = fuzzer._build_arguments("function_ssa_var_def_use", definition, fuzz=False)
         assert arguments["function_start"] == 0x2000
         assert arguments["variable_name"] == "arg2"
         assert "def_addr" not in arguments
@@ -161,14 +161,14 @@ def test_instruction_probe_uses_actual_il_address_after_optimization(tmp_path, m
         fuzzer._state.function_starts.add(0x1000)
 
         def query(name, arguments):
-            assert name == "il.function"
+            assert name == "il_function"
             assert arguments["function_start"] == 0x1000
             return False, {"items": [{"address": "0x1008"}]}, ""
 
         monkeypatch.setattr(fuzzer._client, "call_tool", query)
         monkeypatch.setattr(fuzzer, "_invoke", lambda *_args, **_kwargs: None)
         arguments = fuzzer._build_arguments(
-            "il.instruction_by_addr",
+            "il_instruction_by_addr",
             {
                 "inputSchema": {
                     "required": ["session_id", "function_start", "address"],

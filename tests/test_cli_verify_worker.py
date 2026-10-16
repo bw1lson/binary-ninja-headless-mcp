@@ -14,13 +14,13 @@ from binary_ninja_headless_mcp.cli_verify_worker import CliWorker
 
 def test_real_offline_calls_reuse_child_and_capture_argparse():
     with CliWorker() as worker:
-        result = worker.invoke(["list", "--prefix", "session.", "--names-only"])
+        result = worker.invoke(["list", "--prefix", "session_", "--names-only"])
         assert result["exit_code"] == 0, result
-        assert "session.open" in result["stdout"].splitlines()
+        assert "session_open" in result["stdout"].splitlines()
         assert result["pid"] == worker.pid != os.getpid()
-        described = worker.invoke(["describe", "workflow.insert"])
+        described = worker.invoke(["describe", "workflow_insert"])
         assert described["exit_code"] == 0, described
-        assert json.loads(described["stdout"])["name"] == "workflow.insert"
+        assert json.loads(described["stdout"])["name"] == "workflow_insert"
         bad = worker.invoke(["--does-not-exist"])
         assert bad["exit_code"] == 2
         assert "usage:" in bad["stderr"]

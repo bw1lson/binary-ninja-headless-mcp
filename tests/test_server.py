@@ -43,7 +43,7 @@ def _wait_task(server: SimpleMcpServer, task_id: str, timeout: float = 10.0) -> 
 
     while time.time() < deadline:
         request_id += 1
-        status = _call_tool(server, "task.status", {"task_id": task_id}, request_id=request_id)
+        status = _call_tool(server, "task_status", {"task_id": task_id}, request_id=request_id)
         structured = status["structuredContent"]
         if structured["status"] in {"completed", "failed", "cancelled"}:
             return structured
@@ -61,7 +61,7 @@ def _open_session(
 ) -> str:
     opened = _call_tool(
         server,
-        "session.open",
+        "session_open",
         {
             "path": sample_binary_path,
             "update_analysis": False,
@@ -99,52 +99,52 @@ def test_initialize_and_tools_list(real_server: SimpleMcpServer) -> None:
     assert listed["result"]["total"] >= len(listed["result"]["tools"])
     names = {tool["name"] for tool in listed["result"]["tools"]}
     expected = {
-        "health.ping",
-        "binja.info",
-        "session.open",
-        "session.close",
-        "session.list",
-        "session.mode",
-        "session.set_mode",
-        "analysis.status",
-        "analysis.progress",
-        "analysis.update",
-        "analysis.update_and_wait",
-        "analysis.abort",
-        "analysis.set_hold",
-        "binary.summary",
-        "binary.save",
-        "binary.functions",
-        "binary.strings",
-        "binary.search_text",
-        "binary.sections",
-        "binary.segments",
-        "binary.symbols",
-        "binary.data_vars",
-        "binary.get_function_at",
-        "binary.get_function_disassembly_at",
-        "binary.get_function_il_at",
-        "xref.code_refs_to",
-        "xref.code_refs_from",
-        "xref.data_refs_to",
-        "xref.data_refs_from",
-        "function.callers",
-        "function.callees",
-        "disasm.function",
-        "disasm.range",
-        "il.function",
-        "il.instruction_by_addr",
-        "il.address_to_index",
-        "il.index_to_address",
-        "binja.call",
-        "binja.eval",
-        "task.analysis_update",
-        "task.search_text",
-        "task.status",
-        "task.result",
-        "task.cancel",
-        "database.create_bndb",
-        "database.save_auto_snapshot",
+        "health_ping",
+        "binja_info",
+        "session_open",
+        "session_close",
+        "session_list",
+        "session_mode",
+        "session_set_mode",
+        "analysis_status",
+        "analysis_progress",
+        "analysis_update",
+        "analysis_update_and_wait",
+        "analysis_abort",
+        "analysis_set_hold",
+        "binary_summary",
+        "binary_save",
+        "binary_functions",
+        "binary_strings",
+        "binary_search_text",
+        "binary_sections",
+        "binary_segments",
+        "binary_symbols",
+        "binary_data_vars",
+        "binary_get_function_at",
+        "binary_get_function_disassembly_at",
+        "binary_get_function_il_at",
+        "xref_code_refs_to",
+        "xref_code_refs_from",
+        "xref_data_refs_to",
+        "xref_data_refs_from",
+        "function_callers",
+        "function_callees",
+        "disasm_function",
+        "disasm_range",
+        "il_function",
+        "il_instruction_by_addr",
+        "il_address_to_index",
+        "il_index_to_address",
+        "binja_call",
+        "binja_eval",
+        "task_analysis_update",
+        "task_search_text",
+        "task_status",
+        "task_result",
+        "task_cancel",
+        "database_create_bndb",
+        "database_save_auto_snapshot",
     }
     assert expected.issubset(names)
 
@@ -170,13 +170,13 @@ def test_tools_list_supports_filtering_and_pagination(real_server: SimpleMcpServ
             "jsonrpc": "2.0",
             "id": 4,
             "method": "tools/list",
-            "params": {"prefix": "binary.", "offset": 0, "limit": 100},
+            "params": {"prefix": "binary_", "offset": 0, "limit": 100},
         }
     )
     assert filtered is not None
     filtered_tools = filtered["result"]["tools"]
     assert filtered_tools
-    assert all(tool["name"].startswith("binary.") for tool in filtered_tools)
+    assert all(tool["name"].startswith("binary_") for tool in filtered_tools)
 
 
 def test_tools_list_without_explicit_pagination_returns_full_catalog(
@@ -195,10 +195,10 @@ def test_tools_list_without_explicit_pagination_returns_full_catalog(
     assert listed["result"]["has_more"] is False
 
     names = {tool["name"] for tool in listed["result"]["tools"]}
-    assert "analysis.status" in names
-    assert "analysis.update_and_wait" in names
-    assert "binja.call" in names
-    assert "binja.eval" in names
+    assert "analysis_status" in names
+    assert "analysis_update_and_wait" in names
+    assert "binja_call" in names
+    assert "binja_eval" in names
 
 
 def test_tool_result_text_is_compact_summary(
@@ -207,7 +207,7 @@ def test_tool_result_text_is_compact_summary(
 ) -> None:
     opened = _call_tool(
         real_server,
-        "session.open",
+        "session_open",
         {
             "path": sample_binary_path,
             "update_analysis": False,
@@ -224,7 +224,7 @@ def test_tool_result_text_is_compact_summary(
     session_id = opened["structuredContent"]["session_id"]
     eval_result = _call_tool(
         real_server,
-        "binja.eval",
+        "binja_eval",
         {"session_id": session_id, "code": "bv.entry_point"},
         request_id=7,
     )
@@ -243,42 +243,42 @@ def test_session_analysis_and_binary_tools(
 ) -> None:
     session_id = _open_session(real_server, sample_binary_path, read_only=False, request_id=10)
 
-    mode = _call_tool(real_server, "session.mode", {"session_id": session_id}, request_id=11)
+    mode = _call_tool(real_server, "session_mode", {"session_id": session_id}, request_id=11)
     assert mode["structuredContent"]["read_only"] is False
 
-    listed = _call_tool(real_server, "session.list", request_id=12)
+    listed = _call_tool(real_server, "session_list", request_id=12)
     assert listed["structuredContent"]["count"] >= 1
 
     summary = _call_tool(
         real_server,
-        "binary.summary",
+        "binary_summary",
         {"session_id": session_id},
         request_id=13,
     )
     assert summary["structuredContent"]["filename"] == sample_binary_path
 
-    _call_tool(real_server, "analysis.status", {"session_id": session_id}, request_id=14)
-    _call_tool(real_server, "analysis.update", {"session_id": session_id}, request_id=15)
-    _call_tool(real_server, "analysis.update_and_wait", {"session_id": session_id}, request_id=16)
-    _call_tool(real_server, "analysis.progress", {"session_id": session_id}, request_id=17)
+    _call_tool(real_server, "analysis_status", {"session_id": session_id}, request_id=14)
+    _call_tool(real_server, "analysis_update", {"session_id": session_id}, request_id=15)
+    _call_tool(real_server, "analysis_update_and_wait", {"session_id": session_id}, request_id=16)
+    _call_tool(real_server, "analysis_progress", {"session_id": session_id}, request_id=17)
 
     hold = _call_tool(
         real_server,
-        "analysis.set_hold",
+        "analysis_set_hold",
         {"session_id": session_id, "hold": True},
         request_id=18,
     )
     assert hold["structuredContent"]["hold"] is True
     _call_tool(
         real_server,
-        "analysis.set_hold",
+        "analysis_set_hold",
         {"session_id": session_id, "hold": False},
         request_id=19,
     )
 
     functions = _call_tool(
         real_server,
-        "binary.functions",
+        "binary_functions",
         {"session_id": session_id, "offset": 0, "limit": 200},
         request_id=20,
     )
@@ -286,31 +286,31 @@ def test_session_analysis_and_binary_tools(
 
     _call_tool(
         real_server,
-        "binary.strings",
+        "binary_strings",
         {"session_id": session_id, "offset": 0, "limit": 20},
         request_id=21,
     )
     _call_tool(
         real_server,
-        "binary.sections",
+        "binary_sections",
         {"session_id": session_id, "offset": 0, "limit": 20},
         request_id=22,
     )
     _call_tool(
         real_server,
-        "binary.segments",
+        "binary_segments",
         {"session_id": session_id, "offset": 0, "limit": 20},
         request_id=23,
     )
     _call_tool(
         real_server,
-        "binary.symbols",
+        "binary_symbols",
         {"session_id": session_id, "offset": 0, "limit": 20},
         request_id=24,
     )
     _call_tool(
         real_server,
-        "binary.data_vars",
+        "binary_data_vars",
         {"session_id": session_id, "offset": 0, "limit": 20},
         request_id=25,
     )
@@ -318,7 +318,7 @@ def test_session_analysis_and_binary_tools(
     entry = summary["structuredContent"]["entry_point"]
     function_at = _call_tool(
         real_server,
-        "binary.get_function_at",
+        "binary_get_function_at",
         {"session_id": session_id, "address": entry},
         request_id=26,
     )
@@ -326,7 +326,7 @@ def test_session_analysis_and_binary_tools(
 
     search = _call_tool(
         real_server,
-        "binary.search_text",
+        "binary_search_text",
         {"session_id": session_id, "query": "Hello", "limit": 10},
         request_id=27,
     )
@@ -335,14 +335,14 @@ def test_session_analysis_and_binary_tools(
     saved_path = tmp_path / "hello.saved"
     saved = _call_tool(
         real_server,
-        "binary.save",
+        "binary_save",
         {"session_id": session_id, "path": str(saved_path)},
         request_id=270,
     )
     assert saved["structuredContent"]["saved"] is True
     assert saved_path.exists()
 
-    closed = _call_tool(real_server, "session.close", {"session_id": session_id}, request_id=28)
+    closed = _call_tool(real_server, "session_close", {"session_id": session_id}, request_id=28)
     assert closed["structuredContent"]["closed"] is True
 
 
@@ -351,11 +351,11 @@ def test_xref_disasm_il_and_eval_tools(
     sample_binary_path: str,
 ) -> None:
     session_id = _open_session(real_server, sample_binary_path, read_only=False, request_id=30)
-    _call_tool(real_server, "analysis.update_and_wait", {"session_id": session_id}, request_id=31)
+    _call_tool(real_server, "analysis_update_and_wait", {"session_id": session_id}, request_id=31)
 
     functions = _call_tool(
         real_server,
-        "binary.functions",
+        "binary_functions",
         {"session_id": session_id, "offset": 0, "limit": 200},
         request_id=32,
     )
@@ -365,7 +365,7 @@ def test_xref_disasm_il_and_eval_tools(
 
     callers = _call_tool(
         real_server,
-        "function.callers",
+        "function_callers",
         {"session_id": session_id, "function_start": add_start},
         request_id=33,
     )
@@ -373,7 +373,7 @@ def test_xref_disasm_il_and_eval_tools(
 
     callees = _call_tool(
         real_server,
-        "function.callees",
+        "function_callees",
         {"session_id": session_id, "function_start": main_start},
         request_id=34,
     )
@@ -381,7 +381,7 @@ def test_xref_disasm_il_and_eval_tools(
 
     refs_to = _call_tool(
         real_server,
-        "xref.code_refs_to",
+        "xref_code_refs_to",
         {"session_id": session_id, "address": add_start, "offset": 0, "limit": 20},
         request_id=35,
     )
@@ -390,7 +390,7 @@ def test_xref_disasm_il_and_eval_tools(
     ref_from = refs_to["structuredContent"]["items"][0]["from"]
     refs_from = _call_tool(
         real_server,
-        "xref.code_refs_from",
+        "xref_code_refs_from",
         {"session_id": session_id, "address": ref_from, "length": 4},
         request_id=36,
     )
@@ -398,20 +398,20 @@ def test_xref_disasm_il_and_eval_tools(
 
     _call_tool(
         real_server,
-        "xref.data_refs_to",
+        "xref_data_refs_to",
         {"session_id": session_id, "address": "0x400860"},
         request_id=37,
     )
     _call_tool(
         real_server,
-        "xref.data_refs_from",
+        "xref_data_refs_from",
         {"session_id": session_id, "address": main_start, "length": 4},
         request_id=38,
     )
 
     disasm_function = _call_tool(
         real_server,
-        "disasm.function",
+        "disasm_function",
         {"session_id": session_id, "address": int(main_start, 0) + 1},
         request_id=39,
     )
@@ -423,7 +423,7 @@ def test_xref_disasm_il_and_eval_tools(
 
     disasm_at = _call_tool(
         real_server,
-        "binary.get_function_disassembly_at",
+        "binary_get_function_disassembly_at",
         {"session_id": session_id, "address": int(main_start, 0) + 2},
         request_id=390,
     )
@@ -431,7 +431,7 @@ def test_xref_disasm_il_and_eval_tools(
 
     il_at = _call_tool(
         real_server,
-        "binary.get_function_il_at",
+        "binary_get_function_il_at",
         {
             "session_id": session_id,
             "address": int(main_start, 0) + 3,
@@ -445,7 +445,7 @@ def test_xref_disasm_il_and_eval_tools(
 
     disasm_range = _call_tool(
         real_server,
-        "disasm.range",
+        "disasm_range",
         {"session_id": session_id, "start": main_start, "length": 16, "limit": 10},
         request_id=40,
     )
@@ -453,7 +453,7 @@ def test_xref_disasm_il_and_eval_tools(
 
     il_function = _call_tool(
         real_server,
-        "il.function",
+        "il_function",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -468,7 +468,7 @@ def test_xref_disasm_il_and_eval_tools(
 
     il_by_addr = _call_tool(
         real_server,
-        "il.instruction_by_addr",
+        "il_instruction_by_addr",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -482,7 +482,7 @@ def test_xref_disasm_il_and_eval_tools(
 
     addr_to_index = _call_tool(
         real_server,
-        "il.address_to_index",
+        "il_address_to_index",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -496,7 +496,7 @@ def test_xref_disasm_il_and_eval_tools(
 
     index_to_addr = _call_tool(
         real_server,
-        "il.index_to_address",
+        "il_index_to_address",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -508,18 +508,18 @@ def test_xref_disasm_il_and_eval_tools(
     )
     assert index_to_addr["structuredContent"]["address"] == first_il["address"]
 
-    call_api = _call_tool(real_server, "binja.call", {"target": "bn.core_version"}, request_id=45)
+    call_api = _call_tool(real_server, "binja_call", {"target": "bn.core_version"}, request_id=45)
     assert isinstance(call_api["structuredContent"]["result"], str)
 
     evaluated = _call_tool(
         real_server,
-        "binja.eval",
+        "binja_eval",
         {"session_id": session_id, "code": "bv.entry_point"},
         request_id=46,
     )
     assert isinstance(evaluated["structuredContent"]["result"], int)
 
-    _call_tool(real_server, "session.close", {"session_id": session_id}, request_id=47)
+    _call_tool(real_server, "session_close", {"session_id": session_id}, request_id=47)
 
 
 def test_task_and_database_tools(
@@ -531,7 +531,7 @@ def test_task_and_database_tools(
 
     task_search = _call_tool(
         real_server,
-        "task.search_text",
+        "task_search_text",
         {"session_id": session_id, "query": "Hello", "limit": 10},
         request_id=61,
     )
@@ -541,7 +541,7 @@ def test_task_and_database_tools(
 
     task_search_result = _call_tool(
         real_server,
-        "task.result",
+        "task_result",
         {"task_id": task_search_id},
         request_id=62,
     )
@@ -549,7 +549,7 @@ def test_task_and_database_tools(
 
     task_analysis = _call_tool(
         real_server,
-        "task.analysis_update",
+        "task_analysis_update",
         {"session_id": session_id},
         request_id=63,
     )
@@ -559,7 +559,7 @@ def test_task_and_database_tools(
 
     cancel_result = _call_tool(
         real_server,
-        "task.cancel",
+        "task_cancel",
         {"task_id": task_search_id},
         request_id=64,
     )
@@ -569,7 +569,7 @@ def test_task_and_database_tools(
     bndb_path = tmp_path / "hello-server.bndb"
     created = _call_tool(
         real_server,
-        "database.create_bndb",
+        "database_create_bndb",
         {"session_id": session_id, "path": str(bndb_path)},
         request_id=65,
     )
@@ -577,7 +577,7 @@ def test_task_and_database_tools(
 
     snapshot = _call_tool(
         real_server,
-        "database.save_auto_snapshot",
+        "database_save_auto_snapshot",
         {"session_id": session_id},
         request_id=66,
     )
@@ -589,8 +589,8 @@ def test_task_and_database_tools(
         read_only=True,
         request_id=67,
     )
-    _call_tool(real_server, "session.close", {"session_id": reopened_session_id}, request_id=68)
-    _call_tool(real_server, "session.close", {"session_id": session_id}, request_id=69)
+    _call_tool(real_server, "session_close", {"session_id": reopened_session_id}, request_id=68)
+    _call_tool(real_server, "session_close", {"session_id": session_id}, request_id=69)
 
 
 def test_binja_eval_transitions_read_only_session_mode(
@@ -601,7 +601,7 @@ def test_binja_eval_transitions_read_only_session_mode(
 
     result = _call_tool(
         real_server,
-        "binja.eval",
+        "binja_eval",
         {"session_id": session_id, "code": "bv.entry_point"},
         request_id=81,
     )
@@ -609,7 +609,7 @@ def test_binja_eval_transitions_read_only_session_mode(
     assert result["structuredContent"]["mode_transitioned"] is True
     assert result["structuredContent"]["transitioned_session_ids"] == [session_id]
 
-    mode = _call_tool(real_server, "session.mode", {"session_id": session_id}, request_id=82)
+    mode = _call_tool(real_server, "session_mode", {"session_id": session_id}, request_id=82)
     assert mode["structuredContent"]["read_only"] is False
 
 
@@ -661,7 +661,7 @@ def test_json_line_parser_and_stdio_loop(
                     "id": 2,
                     "method": "tools/call",
                     "params": {
-                        "name": "session.open",
+                        "name": "session_open",
                         "arguments": {
                             "path": sample_binary_path,
                             "update_analysis": False,

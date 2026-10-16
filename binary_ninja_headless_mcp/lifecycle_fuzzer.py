@@ -164,7 +164,7 @@ class LifecycleFuzzer:
     def settle(self, task_id: str, *, allow_cancel: bool = False) -> dict:
         deadline = time.monotonic() + self.client.timeout
         while True:
-            state = self.client.tool("task.status", task_id=task_id)
+            state = self.client.tool("task_status", task_id=task_id)
             if state["status"] in TERMINAL:
                 break
             assert not state["result_ready"], state
@@ -172,7 +172,7 @@ class LifecycleFuzzer:
                 raise TimeoutError(f"task did not terminate: {task_id}")
             time.sleep(0.01)
         assert state["result_ready"], state
-        result = self.client.tool("task.result", task_id=task_id)
+        result = self.client.tool("task_result", task_id=task_id)
         assert result["status"] == state["status"], result
         expected = {"completed", "cancelled"} if allow_cancel else {"completed"}
         assert result["status"] in expected, result
@@ -185,7 +185,7 @@ class LifecycleFuzzer:
         for task_id, allow_cancel in list(self.pending.items()):
             self.settle(task_id, allow_cancel=allow_cancel)
 
-    def start(self, name: str = "analysis.update") -> str:
+    def start(self, name: str = "analysis_update") -> str:
         payload = self.tool(name)
         task_id = payload["task_id"]
         assert payload["session_id"] == self.sid
@@ -194,7 +194,7 @@ class LifecycleFuzzer:
         return task_id
 
     def check_status(self) -> dict:
-        status = self.tool("analysis.status")
+        status = self.tool("analysis_status")
         assert {
             "status",
             "state",
@@ -215,7 +215,7 @@ class LifecycleFuzzer:
 
     def open(self, path: Path, *, analyze: bool) -> None:
         payload = self.client.tool(
-            "session.open",
+            "session_open",
             path=str(path),
             update_analysis=analyze,
             read_only=False,
@@ -228,33 +228,33 @@ class LifecycleFuzzer:
 
     def initialize(self) -> dict:
         self.client.call("initialize")
-        info = self.client.tool("binja.info")
+        info = self.client.tool("binja_info")
         if self.analysis_database is None:
             self.open(self.binary, analyze=True)
-            assert self.tool("database.create_bndb", path=str(self.database))["created"]
+            assert self.tool("database_create_bndb", path=str(self.database))["created"]
         else:
             shutil.copy2(self.analysis_database, self.database)
             self.open(self.database, analyze=True)
         # Exercise the bytes loader and temporary-file cleanup on the full input.
         data = base64.b64encode(self.binary.read_bytes()).decode("ascii")
         extra = self.client.tool(
-            "session.open_bytes", data_base64=data, filename=self.binary.name, update_analysis=False
+            "session_open_bytes", data_base64=data, filename=self.binary.name, update_analysis=False
         )
         child = self.client.tool(
-            "session.open_existing",
+            "session_open_existing",
             source_session_id=extra["session_id"],
             update_analysis=False,
             options=self.load_options,
         )
-        self.client.tool("session.close", session_id=extra["session_id"])
+        self.client.tool("session_close", session_id=extra["session_id"])
         grandchild = self.client.tool(
-            "session.open_existing",
+            "session_open_existing",
             source_session_id=child["session_id"],
             update_analysis=False,
             options=self.load_options,
         )
-        self.client.tool("session.close", session_id=child["session_id"])
-        self.client.tool("session.close", session_id=grandchild["session_id"])
+        self.client.tool("session_close", session_id=child["session_id"])
+        self.client.tool("session_close", session_id=grandchild["session_id"])
         return info
 
     def transition(self, action: str) -> None:  # noqa: PLR0912, PLR0915
@@ -262,82 +262,82 @@ class LifecycleFuzzer:
         if action not in {"status", "read", "old_cancel", "invalid"}:
             self.drain()
         if action in {"async", "alias"}:
-            self.start("analysis.update" if action == "async" else "task.analysis_update")
+            self.start("analysis_update" if action == "async" else "task_analysis_update")
         elif action == "sync":
-            assert self.tool("analysis.update_and_wait")["status"] == "completed"
+            assert self.tool("analysis_update_and_wait")["status"] == "completed"
         elif action == "status":
             self.check_status()
         elif action == "cancel":
             tid = self.start()
-            self.client.tool("task.cancel", task_id=tid)
+            self.client.tool("task_cancel", task_id=tid)
             self.pending[tid] = True
             self.settle(tid, allow_cancel=True)
-            assert self.tool("analysis.update_and_wait")["status"] == "completed"
+            assert self.tool("analysis_update_and_wait")["status"] == "completed"
             assert self.check_status()["is_aborted"] is False
         elif action == "abort":
             tid = self.start()
-            self.tool("analysis.abort")
+            self.tool("analysis_abort")
             self.pending[tid] = True
             self.settle(tid, allow_cancel=True)
-            assert self.tool("analysis.update_and_wait")["status"] == "completed"
+            assert self.tool("analysis_update_and_wait")["status"] == "completed"
             assert self.check_status()["is_aborted"] is False
         elif action == "old_cancel":
             if self.terminal:
                 tid = self.rng.choice(sorted(self.terminal))
-                before = self.client.tool("task.status", task_id=tid)
-                self.client.tool("task.cancel", task_id=tid)
-                after = self.client.tool("task.status", task_id=tid)
+                before = self.client.tool("task_status", task_id=tid)
+                self.client.tool("task_cancel", task_id=tid)
+                after = self.client.tool("task_status", task_id=tid)
                 assert before == after, (before, after)
                 self.settle(tid, allow_cancel=True)
         elif action == "search":
-            task = self.tool("task.search_text", query="main", limit=5)
+            task = self.tool("task_search_text", query="main", limit=5)
             self.settle(task["task_id"])
         elif action == "read":
-            summary = self.tool("binary.summary")
-            self.tool("memory.read", address=summary["start"], length=16)
-            functions = self.tool("binary.functions", offset=0, limit=5)["items"]
+            summary = self.tool("binary_summary")
+            self.tool("memory_read", address=summary["start"], length=16)
+            functions = self.tool("binary_functions", offset=0, limit=5)["items"]
             assert functions, "completed analysis should discover functions in this corpus"
             address = self.rng.choice(functions)["start"]
-            self.tool("binary.get_function_disassembly_at", address=address)
-            self.tool("binary.get_function_il_at", address=address, level="llil")
+            self.tool("binary_get_function_disassembly_at", address=address)
+            self.tool("binary_get_function_il_at", address=address, level="llil")
         elif action == "invalid":
             self.client.tool(
-                "task.status", task_id="missing-task", expected_error="unknown task_id"
+                "task_status", task_id="missing-task", expected_error="unknown task_id"
             )
             self.client.tool(
-                "analysis.update", session_id="missing-session", expected_error="unknown session_id"
+                "analysis_update", session_id="missing-session", expected_error="unknown session_id"
             )
         elif action == "reopen":
-            self.tool("session.close")
+            self.tool("session_close")
             self.open(self.database, analyze=self.rng.choice([True, False]))
         elif action == "existing":
             opened = self.client.tool(
-                "session.open_existing",
+                "session_open_existing",
                 source_session_id=self.sid,
                 update_analysis=True,
                 options=self.load_options,
             )
-            self.client.tool("session.close", session_id=opened["session_id"])
+            self.client.tool("session_close", session_id=opened["session_id"])
         elif action == "close_active":
             tid = self.start()
             old_sid = self.sid
-            self.tool("session.close")
+            self.tool("session_close")
             self.settle(tid, allow_cancel=True)
             self.client.tool(
-                "binary.summary", session_id=old_sid, expected_error="unknown session_id"
+                "binary_summary", session_id=old_sid, expected_error="unknown session_id"
             )
             self.open(self.database, analyze=False)
         elif action == "overlap":
             first = self.start()
             response = self.client.call(
                 "tools/call",
-                {"name": "task.analysis_update", "arguments": {"session_id": self.sid}},
+                {"name": "task_analysis_update", "arguments": {"session_id": self.sid}},
             )
             if response["isError"]:
                 assert "already running" in response["structuredContent"]["error"], response
             else:
                 # A small native job may finish between consecutive wire requests.
-                assert self.client.tool("task.status", task_id=first)["status"] == "completed"
+                assert self.client.tool("task_status", task_id=first)["status"] == "completed"
                 self.pending[response["structuredContent"]["task_id"]] = False
             self.drain()
         else:

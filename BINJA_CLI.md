@@ -35,9 +35,9 @@ This discovery and health sequence needs no Binary Ninja runtime:
 
 <!-- smoke: offline -->
 ```bash
-binja_cli list --prefix session. --names-only
-binja_cli describe session.open
-binja_cli --fake-backend call health.ping
+binja_cli list --prefix session_ --names-only
+binja_cli describe session_open
+binja_cli --fake-backend call health_ping
 ```
 
 The fake backend is for client development and tests. It does not establish that
@@ -72,9 +72,9 @@ use absolute paths when the server's working directory may differ from the clien
 
 ```bash
 binja_cli server start
-SID=$(binja_cli --field session_id call session.open --path /bin/ls)
-binja_cli --session-id "$SID" call binary.functions --limit 5
-binja_cli call session.close --session-id "$SID"
+SID=$(binja_cli --field session_id call session_open --path /bin/ls)
+binja_cli --session-id "$SID" call binary_functions --limit 5
+binja_cli call session_close --session-id "$SID"
 binja_cli server stop
 ```
 
@@ -94,9 +94,9 @@ python3 -m binary_ninja_headless_mcp --transport tcp --host 127.0.0.1 --port 876
 In another terminal:
 
 ```bash
-binja_cli --connect 127.0.0.1:8765 call health.ping
+binja_cli --connect 127.0.0.1:8765 call health_ping
 export BINJA_CLI_CONNECT=127.0.0.1:8765
-binja_cli call session.list
+binja_cli call session_list
 ```
 
 The remote client uses newline-delimited JSON-RPC over TCP. It validates protocol
@@ -133,8 +133,8 @@ Invoke any tool from the catalog. Required fields and flag spellings come from i
 schema; omitted optional arguments remain omitted when sent to the server.
 
 ```bash
-binja_cli --session-id "$SID" call binary.functions --offset 0 --limit 20
-binja_cli --raw call health.ping
+binja_cli --session-id "$SID" call binary_functions --offset 0 --limit 20
+binja_cli --raw call health_ping
 ```
 
 ### `list` and `tools`
@@ -146,7 +146,7 @@ These aliases list the local catalog. Options: `--prefix PREFIX`, `--query TEXT`
 
 ```bash
 binja_cli tools --query workflow
-binja_cli list --prefix function. --offset 0 --limit 5
+binja_cli list --prefix function_ --offset 0 --limit 5
 ```
 
 ### `describe TOOL`
@@ -156,7 +156,7 @@ effective `defaults`. These are local definitions; use `raw tools/list` to inspe
 the catalog of a separately installed remote server when investigating version skew.
 
 ```bash
-binja_cli describe workflow.machine.control
+binja_cli describe workflow_machine_control
 ```
 
 ### `raw METHOD [--params JSON | --params-stdin] [--yes]`
@@ -169,7 +169,7 @@ managed worker: it also verifies that the owned process and listener terminate.
 
 ```bash
 binja_cli raw tools/list --params '{"prefix":"memory.","offset":0,"limit":10}'
-printf '%s\n' '{"name":"health.ping","arguments":{}}' | binja_cli raw tools/call --params-stdin
+printf '%s\n' '{"name":"health_ping","arguments":{}}' | binja_cli raw tools/call --params-stdin
 ```
 
 `raw --params` accepts a literal JSON object; unlike `call --json`, it does not
@@ -180,8 +180,8 @@ interpret `@file`. Use `--params-stdin < params.json` for files.
 Read one JSON object per nonblank line, in order, using one backend/connection:
 
 ```json
-{"tool":"session.open","arguments":{"path":"/bin/ls"}}
-{"tool":"binary.functions","arguments":{"limit":5}}
+{"tool":"session_open","arguments":{"path":"/bin/ls"}}
+{"tool":"binary_functions","arguments":{"limit":5}}
 ```
 
 `name` is an alias for `tool`, and `args` is an alias for `arguments`. Values are
@@ -203,8 +203,8 @@ This executable demonstration uses fake analysis and cleans up its own session:
 <!-- smoke: fake-batch -->
 ```bash
 printf '%s\n' \
-  '{"tool":"session.open","arguments":{"path":"/bin/ls"}}' \
-  '{"tool":"binary.functions","arguments":{"limit":5}}' \
+  '{"tool":"session_open","arguments":{"path":"/bin/ls"}}' \
+  '{"tool":"binary_functions","arguments":{"limit":5}}' \
   | binja_cli --fake-backend batch - --close-after
 ```
 
@@ -222,7 +222,7 @@ locking. Explicit TCP and in-process use do not require managed process control.
 ```bash
 binja_cli --fake-backend server start --port 8766
 binja_cli server status
-binja_cli call health.ping
+binja_cli call health_ping
 binja_cli server stop
 ```
 
@@ -259,8 +259,8 @@ schema's exact spelling. Values beginning with `--` need the equals form.
 Typed overrides are `:str`, `:int`, `:float`, `:bool`, `:json`, and `:null`:
 
 ```bash
-binja_cli --session-id "$SID" call memory.read --address:int 4096 --length 16
-binja_cli --session-id "$SID" call binja.call --target bv.read --args:json '[4096,16]'
+binja_cli --session-id "$SID" call memory_read --address:int 4096 --length 16
+binja_cli --session-id "$SID" call binja_call --target bv.read --args:json '[4096,16]'
 ```
 
 These examples assume address 4096 is mapped in the current view; use addresses
@@ -282,8 +282,8 @@ of ordering. Repeated ordinary array flags build their own replacement array;
 they do not append to an array in the base JSON object.
 
 ```bash
-binja_cli --session-id "$SID" call binary.functions --json '{"offset":0,"limit":20}' --limit 5
-printf '%s\n' '{"offset":0,"limit":5}' | binja_cli --session-id "$SID" call binary.functions --json-stdin
+binja_cli --session-id "$SID" call binary_functions --json '{"offset":0,"limit":20}' --limit 5
+printf '%s\n' '{"offset":0,"limit":5}' | binja_cli --session-id "$SID" call binary_functions --json-stdin
 ```
 
 For any flag value, `@PATH` reads a UTF-8 file, and `-` reads stdin. Stdin is read
@@ -292,24 +292,24 @@ starting with `@` or equal to `-`, put it inside a full JSON argument object.
 
 ### Native Python bridge
 
-`binja.call` invokes a `bn.*` or `bv.*` API target; `binja.eval` evaluates Python
+`binja_call` invokes a `bn.*` or `bv.*` API target; `binja_eval` evaluates Python
 with `bn`, `sessions`, and an optional session's `bv`. The code bridge exposes
 capabilities beyond the named tools and runs inside the backend process.
 
 ```bash
-binja_cli call binja.call --target bn.core_version
-binja_cli --session-id "$SID" call binja.eval --code 'len(bv.functions)'
-printf '%s\n' 'len(bv.functions)' | binja_cli --session-id "$SID" call binja.eval --code -
+binja_cli call binja_call --target bn.core_version
+binja_cli --session-id "$SID" call binja_eval --code 'len(bv.functions)'
+printf '%s\n' 'len(bv.functions)' | binja_cli --session-id "$SID" call binja_eval --code -
 ```
 
-For a saved script, use `binja_cli --session-id "$SID" call binja.eval --code @inspect.py`.
+For a saved script, use `binja_cli --session-id "$SID" call binja_eval --code @inspect.py`.
 Inspect returned structured data when using multi-statement code; do not assume
 it is formatted like an interactive Python terminal. An expression returns its
 value as `result`; multi-statement code returns the value assigned to `_` (or null).
 Captured output appears as `stdout`/`stderr` when nonempty.
 
 The Python bridge transitions affected read-only sessions to writable mode before
-execution, even for an expression that only reads state. `binja.eval` without a
+execution, even for an expression that only reads state. `binja_eval` without a
 session can affect all currently open sessions. Inspect `mode_transitioned` and
 `transitioned_session_ids` in the response; named read tools avoid this transition.
 
@@ -321,15 +321,15 @@ Use private binary copies and output paths when preserving the original matters.
 Tools enforce their backend's mutation policy; unrestricted Python execution is
 not a sandbox and must only receive trusted code.
 
-For multi-step undoable edits, call `undo.begin`, perform the edits, and then
-`undo.commit` with the returned transaction ID, or `undo.revert` to discard them.
-`undo.undo`/`undo.redo` operate on committed undo history. `binary.save` writes
-binary bytes; `database.create_bndb` writes an analysis database. Reopen saved artifacts
+For multi-step undoable edits, call `undo_begin`, perform the edits, and then
+`undo_commit` with the returned transaction ID, or `undo_revert` to discard them.
+`undo_undo`/`undo_redo` operate on committed undo history. `binary_save` writes
+binary bytes; `database_create_bndb` writes an analysis database. Reopen saved artifacts
 and read back the affected bytes/types/names to verify persistence.
 
 ### Workflow controls and plugin actions
 
-`workflow.machine.control` dispatches these action strings (case-insensitive):
+`workflow_machine_control` dispatches these action strings (case-insensitive):
 
 | Action | Additional arguments and behavior |
 | --- | --- |
@@ -340,8 +340,8 @@ and read back the affected bytes/types/names to verify persistence.
 | `override_set` | Requires `activity` and `enable` (including explicit false). |
 | `override_clear` | Requires `activity`. |
 
-Use `workflow.describe` to discover valid activities for the selected workflow and
-`workflow.machine.status` to verify state. Unsupported or native-rejected control
+Use `workflow_describe` to discover valid activities for the selected workflow and
+`workflow_machine_status` to verify state. Unsupported or native-rejected control
 actions fail. On runtimes that reject the native `dump` command, the tool instead
 returns a diagnostic snapshot assembled from accepted native state queries and
 workflow configuration. `dump_source` distinguishes `native_command` from
@@ -349,14 +349,14 @@ workflow configuration. `dump_source` distinguishes `native_command` from
 original rejected native response in `command_result`. This snapshot is not a
 claim that the native dump command was accepted.
 
-`plugin_repo.plugin_action` accepts `install`, `uninstall`, `enable`, and `disable`.
-Discover repository/plugin identifiers with `plugin_repo.status` before acting.
+`plugin_repo_plugin_action` accepts `install`, `uninstall`, `enable`, and `disable`.
+Discover repository/plugin identifiers with `plugin_repo_status` before acting.
 Inspect `installed`, `enabled`, `disable_pending`, and `delete_pending` in results:
 some changes take effect after restarting the Binary Ninja runtime. The `changed`
 field describes the immediate action result, not proof that deferred cleanup has
 finished. Repository refresh/update and installation can access the network.
 
-`plugin.execute` needs a registered command and a context valid for that command
+`plugin_execute` needs a registered command and a context valid for that command
 (default, address, or range). `executed: true` means native execution returned
 without an explicit failure after context validation; verify the command's
 intended effect separately. A native API returning Python `None` is normal for
@@ -364,7 +364,7 @@ successful command execution.
 
 ### Base-address detection
 
-`baseaddr.detect` accepts `--algorithm instruction` (the unchanged default) or
+`baseaddr_detect` accepts `--algorithm instruction` (the unchanged default) or
 `--algorithm sampling`. Both invoke Binary Ninja's native detector; sampling
 requires a runtime exposing `detect_base_address_with_sampling`. An older runtime
 without that API returns an error when sampling is explicitly requested.
@@ -385,14 +385,14 @@ For a raw AArch64 view containing strings and pointers into an image expected ne
 `0x400000`, a bounded sampling request is:
 
 ```bash
-binja_cli --session-id "$SID" call baseaddr.detect --algorithm sampling --arch-name aarch64 --min-strlen 10 --low-boundary 0x400000 --high-boundary 0x410000
-binja_cli --session-id "$SID" call baseaddr.reasons --base-address 0x400000
+binja_cli --session-id "$SID" call baseaddr_detect --algorithm sampling --arch-name aarch64 --min-strlen 10 --low-boundary 0x400000 --high-boundary 0x410000
+binja_cli --session-id "$SID" call baseaddr_reasons --base-address 0x400000
 ```
 
 Choose architecture and boundaries for the actual input; this example is not a
-claim that an arbitrary binary uses that base. `baseaddr.reasons` queries a
+claim that an arbitrary binary uses that base. `baseaddr_reasons` queries a
 candidate from the most recent detection context in the same session.
-`baseaddr.abort` targets that detector context. Keep the session on a persistent
+`baseaddr_abort` targets that detector context. Keep the session on a persistent
 server or within one batch so the context remains available.
 
 ## Output and exit codes
@@ -415,7 +415,7 @@ including cleanup. Selecting a field does not turn a tool error into success.
 
 ## Security and troubleshooting
 
-The TCP analysis endpoint has **no authentication or encryption**. `binja.eval`,
+The TCP analysis endpoint has **no authentication or encryption**. `binja_eval`,
 the API bridge, plugins, and writable operations can execute code or change files
 with the backend user's permissions. Bind to loopback (the default) and trust
 clients with local access. Changing `--host` to a public interface exposes these
@@ -427,7 +427,7 @@ not appear in argument listings or shell history.
 | --- | --- |
 | Missing `binaryninja` or license error | Verify the same Python interpreter can import the API and initialize its licensed core; inspect `server.log`. |
 | Session is missing | Confirm the selected server and avoid reusing an in-process or pre-restart ID. |
-| Mutation rejected | Inspect `session.mode`; enable writable mode deliberately. |
+| Mutation rejected | Inspect `session_mode`; enable writable mode deliberately. |
 | Tool or parameter missing remotely | Compare local `describe` with remote `raw tools/list`; install matching client/server versions. |
 | Startup says address in use | Use another port or stop the process that owns it; an unrelated listener is not adopted. |
 | Managed directory rejected | Set a private owned `BINJA_CLI_HOME` or fix directory mode to `0700`. |
@@ -500,7 +500,7 @@ own complete MCP catalog, so tool names and runtime semantics remain native.
 
 | Area | Binary Ninja behavior |
 | --- | --- |
-| Session tools | `session.open`, `session.open_bytes`, `session.open_existing`, and `session.close`; Ghidra workflows commonly use `program.*`. |
+| Session tools | `session_open`, `session_open_bytes`, `session_open_existing`, and `session_close`; Ghidra workflows commonly use `program.*`. |
 | Address strings | Bare digits are decimal; use `0x` for hex. Ghidra's client documents bare-digit addresses as hexadecimal. |
 | Runtime setup | Importable licensed `binaryninja`; no `--ghidra-install-dir` option or JVM. Determinism is a session argument rather than a CLI-wide startup flag. |
 | Environment and port | `BINJA_CLI_CONNECT`, `BINJA_CLI_SESSION`, `BINJA_CLI_HOME`; managed default port 8766. |
@@ -524,7 +524,7 @@ Groups: [analysis](#analysis-tools) · [annotation](#annotation-tools) · [arch]
 
 ### analysis tools
 
-#### `analysis.abort`
+#### `analysis_abort`
 
 Abort analysis.
 
@@ -544,7 +544,7 @@ Abort analysis.
 
 Effective defaults: `{}`.
 
-#### `analysis.progress`
+#### `analysis_progress`
 
 Get analysis progress snapshot.
 
@@ -564,7 +564,7 @@ Get analysis progress snapshot.
 
 Effective defaults: `{}`.
 
-#### `analysis.set_hold`
+#### `analysis_set_hold`
 
 Hold/release analysis queue.
 
@@ -588,7 +588,7 @@ Hold/release analysis queue.
 
 Effective defaults: `{}`.
 
-#### `analysis.status`
+#### `analysis_status`
 
 Get lifecycle status, timestamps, task and error, plus native state/progress.
 
@@ -608,7 +608,7 @@ Get lifecycle status, timestamps, task and error, plus native state/progress.
 
 Effective defaults: `{}`.
 
-#### `analysis.update`
+#### `analysis_update`
 
 Start tracked analysis and return task_id; reject overlap on this session.
 
@@ -628,7 +628,7 @@ Start tracked analysis and return task_id; reject overlap on this session.
 
 Effective defaults: `{}`.
 
-#### `analysis.update_and_wait`
+#### `analysis_update_and_wait`
 
 Wait synchronously until analysis finishes; no timed partial-success response.
 
@@ -651,7 +651,7 @@ Effective defaults: `{}`.
 
 ### annotation tools
 
-#### `annotation.add_tag`
+#### `annotation_add_tag`
 
 Add user data tag at address.
 
@@ -693,7 +693,7 @@ Add user data tag at address.
 
 Effective defaults: `{"icon": "M"}`.
 
-#### `annotation.define_data_var`
+#### `annotation_define_data_var`
 
 Define data variable.
 
@@ -734,7 +734,7 @@ Define data variable.
 
 Effective defaults: `{"name": null, "type_name": "char", "width": 1}`.
 
-#### `annotation.define_symbol`
+#### `annotation_define_symbol`
 
 Define symbol at address.
 
@@ -772,7 +772,7 @@ Define symbol at address.
 
 Effective defaults: `{"symbol_type": "FunctionSymbol"}`.
 
-#### `annotation.get_comment`
+#### `annotation_get_comment`
 
 Get comment at address.
 
@@ -803,7 +803,7 @@ Get comment at address.
 
 Effective defaults: `{}`.
 
-#### `annotation.get_tags`
+#### `annotation_get_tags`
 
 Get tags at address.
 
@@ -834,7 +834,7 @@ Get tags at address.
 
 Effective defaults: `{}`.
 
-#### `annotation.rename_data_var`
+#### `annotation_rename_data_var`
 
 Rename data variable.
 
@@ -869,7 +869,7 @@ Rename data variable.
 
 Effective defaults: `{}`.
 
-#### `annotation.rename_function`
+#### `annotation_rename_function`
 
 Rename a function.
 
@@ -904,7 +904,7 @@ Rename a function.
 
 Effective defaults: `{}`.
 
-#### `annotation.rename_symbol`
+#### `annotation_rename_symbol`
 
 Rename symbol at address.
 
@@ -939,7 +939,7 @@ Rename symbol at address.
 
 Effective defaults: `{}`.
 
-#### `annotation.set_comment`
+#### `annotation_set_comment`
 
 Set comment at address.
 
@@ -974,7 +974,7 @@ Set comment at address.
 
 Effective defaults: `{}`.
 
-#### `annotation.undefine_data_var`
+#### `annotation_undefine_data_var`
 
 Undefine data variable.
 
@@ -1005,7 +1005,7 @@ Undefine data variable.
 
 Effective defaults: `{}`.
 
-#### `annotation.undefine_symbol`
+#### `annotation_undefine_symbol`
 
 Undefine user symbol at address.
 
@@ -1039,7 +1039,7 @@ Effective defaults: `{}`.
 
 ### arch tools
 
-#### `arch.assemble`
+#### `arch_assemble`
 
 Assemble instruction text with selected architecture.
 
@@ -1072,7 +1072,7 @@ Assemble instruction text with selected architecture.
 
 Effective defaults: `{"address": 0, "arch_name": null}`.
 
-#### `arch.disasm_bytes`
+#### `arch_disasm_bytes`
 
 Disassemble bytes with selected architecture.
 
@@ -1105,7 +1105,7 @@ Disassemble bytes with selected architecture.
 
 Effective defaults: `{"address": 0, "arch_name": null}`.
 
-#### `arch.info`
+#### `arch_info`
 
 Get architecture and platform metadata.
 
@@ -1128,7 +1128,7 @@ Effective defaults: `{}`.
 
 ### baseaddr tools
 
-#### `baseaddr.abort`
+#### `baseaddr_abort`
 
 Abort base-address detection.
 
@@ -1148,7 +1148,7 @@ Abort base-address detection.
 
 Effective defaults: `{}`.
 
-#### `baseaddr.detect`
+#### `baseaddr_detect`
 
 Run base-address detection.
 
@@ -1196,7 +1196,7 @@ Run base-address detection.
 
 Effective defaults: `{"algorithm": "instruction", "alignment": 1024, "analysis": "full", "arch_name": null, "high_boundary": 18446744073709551615, "low_boundary": 0, "max_pointers": 128, "min_strlen": 10}`.
 
-#### `baseaddr.reasons`
+#### `baseaddr_reasons`
 
 Get base-address detection reasons.
 
@@ -1226,7 +1226,7 @@ Effective defaults: `{}`.
 
 ### binary tools
 
-#### `binary.basic_blocks_at`
+#### `binary_basic_blocks_at`
 
 List basic blocks at an address with pagination.
 
@@ -1265,7 +1265,7 @@ List basic blocks at an address with pagination.
 
 Effective defaults: `{"limit": 100, "offset": 0}`.
 
-#### `binary.data_vars`
+#### `binary_data_vars`
 
 List data variables with pagination.
 
@@ -1293,7 +1293,7 @@ List data variables with pagination.
 
 Effective defaults: `{"limit": 100, "offset": 0}`.
 
-#### `binary.functions`
+#### `binary_functions`
 
 List functions with pagination.
 
@@ -1321,7 +1321,7 @@ List functions with pagination.
 
 Effective defaults: `{"limit": 100, "offset": 0}`.
 
-#### `binary.functions_at`
+#### `binary_functions_at`
 
 List functions at an address.
 
@@ -1352,7 +1352,7 @@ List functions at an address.
 
 Effective defaults: `{}`.
 
-#### `binary.get_function_at`
+#### `binary_get_function_at`
 
 Find function by address.
 
@@ -1383,7 +1383,7 @@ Find function by address.
 
 Effective defaults: `{}`.
 
-#### `binary.get_function_disassembly_at`
+#### `binary_get_function_disassembly_at`
 
 Get full disassembly for the function containing an address.
 
@@ -1414,7 +1414,7 @@ Get full disassembly for the function containing an address.
 
 Effective defaults: `{}`.
 
-#### `binary.get_function_il_at`
+#### `binary_get_function_il_at`
 
 Get full IL for the function containing an address.
 
@@ -1456,7 +1456,7 @@ Get full IL for the function containing an address.
 
 Effective defaults: `{"level": "mlil", "ssa": false}`.
 
-#### `binary.save`
+#### `binary_save`
 
 Save the current binary view to a file path.
 
@@ -1480,7 +1480,7 @@ Save the current binary view to a file path.
 
 Effective defaults: `{}`.
 
-#### `binary.search_text`
+#### `binary_search_text`
 
 Search raw text/bytes in a session.
 
@@ -1508,7 +1508,7 @@ Search raw text/bytes in a session.
 
 Effective defaults: `{"limit": 50}`.
 
-#### `binary.sections`
+#### `binary_sections`
 
 List sections with pagination.
 
@@ -1536,7 +1536,7 @@ List sections with pagination.
 
 Effective defaults: `{"limit": 100, "offset": 0}`.
 
-#### `binary.segments`
+#### `binary_segments`
 
 List segments with pagination.
 
@@ -1564,7 +1564,7 @@ List segments with pagination.
 
 Effective defaults: `{"limit": 100, "offset": 0}`.
 
-#### `binary.strings`
+#### `binary_strings`
 
 List discovered strings with pagination.
 
@@ -1592,7 +1592,7 @@ List discovered strings with pagination.
 
 Effective defaults: `{"limit": 100, "offset": 0}`.
 
-#### `binary.summary`
+#### `binary_summary`
 
 Get binary/session summary.
 
@@ -1612,7 +1612,7 @@ Get binary/session summary.
 
 Effective defaults: `{}`.
 
-#### `binary.symbols`
+#### `binary_symbols`
 
 List symbols with pagination.
 
@@ -1643,7 +1643,7 @@ Effective defaults: `{"limit": 100, "offset": 0}`.
 
 ### binja tools
 
-#### `binja.call`
+#### `binja_call`
 
 Generic API bridge: call `bn.*` or `bv.*` target path.
 
@@ -1673,7 +1673,7 @@ Generic API bridge: call `bn.*` or `bv.*` target path.
 
 Effective defaults: `{"args": [], "kwargs": {}, "session_id": null}`.
 
-#### `binja.eval`
+#### `binja_eval`
 
 Evaluate Python code with `bn`, `sessions`, and optional `bv`.
 
@@ -1696,7 +1696,7 @@ Evaluate Python code with `bn`, `sessions`, and optional `bv`.
 
 Effective defaults: `{"session_id": null}`.
 
-#### `binja.info`
+#### `binja_info`
 
 Return Binary Ninja version/install info.
 
@@ -1712,7 +1712,7 @@ Effective defaults: `{}`.
 
 ### data tools
 
-#### `data.typed_at`
+#### `data_typed_at`
 
 Get typed data variable at an address.
 
@@ -1746,7 +1746,7 @@ Effective defaults: `{}`.
 
 ### database tools
 
-#### `database.create_bndb`
+#### `database_create_bndb`
 
 Create .bndb from session.
 
@@ -1770,7 +1770,7 @@ Create .bndb from session.
 
 Effective defaults: `{}`.
 
-#### `database.info`
+#### `database_info`
 
 Get database status for session.
 
@@ -1790,7 +1790,7 @@ Get database status for session.
 
 Effective defaults: `{}`.
 
-#### `database.read_global`
+#### `database_read_global`
 
 Read database global string key.
 
@@ -1814,7 +1814,7 @@ Read database global string key.
 
 Effective defaults: `{}`.
 
-#### `database.save_auto_snapshot`
+#### `database_save_auto_snapshot`
 
 Save auto snapshot.
 
@@ -1834,7 +1834,7 @@ Save auto snapshot.
 
 Effective defaults: `{}`.
 
-#### `database.snapshots`
+#### `database_snapshots`
 
 List database snapshots.
 
@@ -1860,7 +1860,7 @@ List database snapshots.
 
 Effective defaults: `{"limit": 100, "offset": 0}`.
 
-#### `database.write_global`
+#### `database_write_global`
 
 Write database global string key.
 
@@ -1891,7 +1891,7 @@ Effective defaults: `{}`.
 
 ### debug tools
 
-#### `debug.parse_and_apply`
+#### `debug_parse_and_apply`
 
 Parse debug info and apply it to the view.
 
@@ -1917,7 +1917,7 @@ Parse debug info and apply it to the view.
 
 Effective defaults: `{"debug_path": null, "parser_name": null}`.
 
-#### `debug.parsers`
+#### `debug_parsers`
 
 List debug info parsers valid for this view.
 
@@ -1940,7 +1940,7 @@ Effective defaults: `{}`.
 
 ### disasm tools
 
-#### `disasm.function`
+#### `disasm_function`
 
 Get full disassembly for the function containing an address.
 
@@ -1971,7 +1971,7 @@ Get full disassembly for the function containing an address.
 
 Effective defaults: `{}`.
 
-#### `disasm.linear`
+#### `disasm_linear`
 
 Get linear disassembly lines.
 
@@ -1999,7 +1999,7 @@ Get linear disassembly lines.
 
 Effective defaults: `{"limit": 200, "offset": 0}`.
 
-#### `disasm.range`
+#### `disasm_range`
 
 Address-range disassembly lines.
 
@@ -2042,7 +2042,7 @@ Effective defaults: `{"limit": 200}`.
 
 ### external tools
 
-#### `external.library_add`
+#### `external_library_add`
 
 Add external library.
 
@@ -2069,7 +2069,7 @@ Add external library.
 
 Effective defaults: `{"auto": false}`.
 
-#### `external.library_list`
+#### `external_library_list`
 
 List external libraries.
 
@@ -2089,7 +2089,7 @@ List external libraries.
 
 Effective defaults: `{}`.
 
-#### `external.library_remove`
+#### `external_library_remove`
 
 Remove external library.
 
@@ -2113,7 +2113,7 @@ Remove external library.
 
 Effective defaults: `{}`.
 
-#### `external.location_add`
+#### `external_location_add`
 
 Add external location mapping.
 
@@ -2155,7 +2155,7 @@ Add external location mapping.
 
 Effective defaults: `{"auto": false, "library_name": null, "target_address": null, "target_symbol": null}`.
 
-#### `external.location_get`
+#### `external_location_get`
 
 Get external location mapping.
 
@@ -2182,7 +2182,7 @@ Get external location mapping.
 
 Effective defaults: `{}`.
 
-#### `external.location_remove`
+#### `external_location_remove`
 
 Remove external location mapping.
 
@@ -2212,7 +2212,7 @@ Effective defaults: `{}`.
 
 ### function tools
 
-#### `function.basic_blocks`
+#### `function_basic_blocks`
 
 List basic blocks in a function with pagination.
 
@@ -2251,7 +2251,7 @@ List basic blocks in a function with pagination.
 
 Effective defaults: `{"limit": 100, "offset": 0}`.
 
-#### `function.callees`
+#### `function_callees`
 
 Callees of a function.
 
@@ -2282,7 +2282,7 @@ Callees of a function.
 
 Effective defaults: `{}`.
 
-#### `function.callers`
+#### `function_callers`
 
 Callers of a function.
 
@@ -2313,7 +2313,7 @@ Callers of a function.
 
 Effective defaults: `{}`.
 
-#### `function.metadata_query`
+#### `function_metadata_query`
 
 Query function metadata by key.
 
@@ -2348,7 +2348,7 @@ Query function metadata by key.
 
 Effective defaults: `{}`.
 
-#### `function.metadata_remove`
+#### `function_metadata_remove`
 
 Remove function metadata by key.
 
@@ -2383,7 +2383,7 @@ Remove function metadata by key.
 
 Effective defaults: `{}`.
 
-#### `function.metadata_store`
+#### `function_metadata_store`
 
 Store function metadata by key.
 
@@ -2420,7 +2420,7 @@ Store function metadata by key.
 
 Effective defaults: `{}`.
 
-#### `function.ssa_memory_def_use`
+#### `function_ssa_memory_def_use`
 
 Get SSA memory definition and uses by memory version.
 
@@ -2463,7 +2463,7 @@ Get SSA memory definition and uses by memory version.
 
 Effective defaults: `{"level": "mlil"}`.
 
-#### `function.ssa_var_def_use`
+#### `function_ssa_var_def_use`
 
 Get SSA variable definition and uses.
 
@@ -2510,7 +2510,7 @@ Get SSA variable definition and uses.
 
 Effective defaults: `{"level": "mlil"}`.
 
-#### `function.var_refs`
+#### `function_var_refs`
 
 List variable references in MLIL/HLIL.
 
@@ -2552,7 +2552,7 @@ List variable references in MLIL/HLIL.
 
 Effective defaults: `{"level": "mlil"}`.
 
-#### `function.var_refs_from`
+#### `function_var_refs_from`
 
 List variable references originating from an address.
 
@@ -2605,7 +2605,7 @@ List variable references originating from an address.
 
 Effective defaults: `{"length": null, "level": "mlil"}`.
 
-#### `function.variables`
+#### `function_variables`
 
 List function variables.
 
@@ -2639,7 +2639,7 @@ Effective defaults: `{}`.
 
 ### health tools
 
-#### `health.ping`
+#### `health_ping`
 
 Health check.
 
@@ -2655,7 +2655,7 @@ Effective defaults: `{}`.
 
 ### il tools
 
-#### `il.address_to_index`
+#### `il_address_to_index`
 
 Map address to IL index/indices.
 
@@ -2708,7 +2708,7 @@ Map address to IL index/indices.
 
 Effective defaults: `{"level": "mlil", "ssa": false}`.
 
-#### `il.function`
+#### `il_function`
 
 IL function listing.
 
@@ -2758,7 +2758,7 @@ IL function listing.
 
 Effective defaults: `{"level": "mlil", "limit": 200, "offset": 0, "ssa": false}`.
 
-#### `il.index_to_address`
+#### `il_index_to_address`
 
 Map IL index to source address.
 
@@ -2805,7 +2805,7 @@ Map IL index to source address.
 
 Effective defaults: `{"level": "mlil", "ssa": false}`.
 
-#### `il.instruction_by_addr`
+#### `il_instruction_by_addr`
 
 Get IL instruction by source address.
 
@@ -2858,7 +2858,7 @@ Get IL instruction by source address.
 
 Effective defaults: `{"level": "mlil", "ssa": false}`.
 
-#### `il.rewrite.capabilities`
+#### `il_rewrite_capabilities`
 
 List IL rewrite support for one function and IL level.
 
@@ -2888,7 +2888,7 @@ List IL rewrite support for one function and IL level.
 
 Effective defaults: `{"level": "mlil"}`.
 
-#### `il.rewrite.noop_replace`
+#### `il_rewrite_noop_replace`
 
 Perform no-op IL expression replacement.
 
@@ -2927,7 +2927,7 @@ Perform no-op IL expression replacement.
 
 Effective defaults: `{"finalize": true, "generate_ssa_form": true, "index": null, "level": "mlil"}`.
 
-#### `il.rewrite.translate_identity`
+#### `il_rewrite_translate_identity`
 
 Translate IL with identity mapping callback.
 
@@ -2960,7 +2960,7 @@ Effective defaults: `{"level": "mlil"}`.
 
 ### loader tools
 
-#### `loader.load_settings_get`
+#### `loader_load_settings_get`
 
 Get loader settings values.
 
@@ -2984,7 +2984,7 @@ Get loader settings values.
 
 Effective defaults: `{}`.
 
-#### `loader.load_settings_set`
+#### `loader_load_settings_set`
 
 Set one loader setting value.
 
@@ -3017,7 +3017,7 @@ Set one loader setting value.
 
 Effective defaults: `{"value_type": "string"}`.
 
-#### `loader.load_settings_types`
+#### `loader_load_settings_types`
 
 List loader settings type names.
 
@@ -3037,7 +3037,7 @@ List loader settings type names.
 
 Effective defaults: `{}`.
 
-#### `loader.rebase`
+#### `loader_rebase`
 
 Rebase BinaryView.
 
@@ -3070,7 +3070,7 @@ Effective defaults: `{"force": false}`.
 
 ### mcp tools
 
-#### `mcp.response_format`
+#### `mcp_response_format`
 
 Explain MCP tool result fields (`structuredContent` full payload, `content[0].text` summary).
 
@@ -3086,7 +3086,7 @@ Effective defaults: `{}`.
 
 ### memory tools
 
-#### `memory.insert`
+#### `memory_insert`
 
 Insert bytes (hex) into the view.
 
@@ -3121,7 +3121,7 @@ Insert bytes (hex) into the view.
 
 Effective defaults: `{}`.
 
-#### `memory.read`
+#### `memory_read`
 
 Read bytes from the view.
 
@@ -3158,7 +3158,7 @@ Read bytes from the view.
 
 Effective defaults: `{}`.
 
-#### `memory.reader_read`
+#### `memory_reader_read`
 
 Read integer values via BinaryReader.
 
@@ -3206,7 +3206,7 @@ Read integer values via BinaryReader.
 
 Effective defaults: `{"endian": "little"}`.
 
-#### `memory.remove`
+#### `memory_remove`
 
 Remove bytes from the view.
 
@@ -3242,7 +3242,7 @@ Remove bytes from the view.
 
 Effective defaults: `{}`.
 
-#### `memory.write`
+#### `memory_write`
 
 Write bytes (hex) to the view.
 
@@ -3277,7 +3277,7 @@ Write bytes (hex) to the view.
 
 Effective defaults: `{}`.
 
-#### `memory.writer_write`
+#### `memory_writer_write`
 
 Write integer values via BinaryWriter.
 
@@ -3332,7 +3332,7 @@ Effective defaults: `{"endian": "little"}`.
 
 ### metadata tools
 
-#### `metadata.query`
+#### `metadata_query`
 
 Query metadata by key.
 
@@ -3356,7 +3356,7 @@ Query metadata by key.
 
 Effective defaults: `{}`.
 
-#### `metadata.remove`
+#### `metadata_remove`
 
 Remove metadata by key.
 
@@ -3380,7 +3380,7 @@ Remove metadata by key.
 
 Effective defaults: `{}`.
 
-#### `metadata.store`
+#### `metadata_store`
 
 Store metadata by key.
 
@@ -3409,7 +3409,7 @@ Effective defaults: `{}`.
 
 ### patch tools
 
-#### `patch.always_branch`
+#### `patch_always_branch`
 
 Patch conditional branch to always branch when supported.
 
@@ -3440,7 +3440,7 @@ Patch conditional branch to always branch when supported.
 
 Effective defaults: `{}`.
 
-#### `patch.assemble`
+#### `patch_assemble`
 
 Assemble and patch instruction bytes at address.
 
@@ -3475,7 +3475,7 @@ Assemble and patch instruction bytes at address.
 
 Effective defaults: `{}`.
 
-#### `patch.convert_to_nop`
+#### `patch_convert_to_nop`
 
 Patch instruction to NOP when supported.
 
@@ -3506,7 +3506,7 @@ Patch instruction to NOP when supported.
 
 Effective defaults: `{}`.
 
-#### `patch.invert_branch`
+#### `patch_invert_branch`
 
 Patch conditional branch by inversion when supported.
 
@@ -3537,7 +3537,7 @@ Patch conditional branch by inversion when supported.
 
 Effective defaults: `{}`.
 
-#### `patch.never_branch`
+#### `patch_never_branch`
 
 Patch conditional branch to never branch when supported.
 
@@ -3568,7 +3568,7 @@ Patch conditional branch to never branch when supported.
 
 Effective defaults: `{}`.
 
-#### `patch.skip_and_return_value`
+#### `patch_skip_and_return_value`
 
 Patch instruction to skip and return value when supported.
 
@@ -3603,7 +3603,7 @@ Patch instruction to skip and return value when supported.
 
 Effective defaults: `{}`.
 
-#### `patch.status`
+#### `patch_status`
 
 Inspect patch availability at address.
 
@@ -3637,7 +3637,7 @@ Effective defaults: `{}`.
 
 ### plugin tools
 
-#### `plugin.execute`
+#### `plugin_execute`
 
 Execute a context-valid plugin command.
 
@@ -3673,7 +3673,7 @@ Execute a context-valid plugin command.
 
 Effective defaults: `{"address": null, "length": 0, "perform": false}`.
 
-#### `plugin.valid_commands`
+#### `plugin_valid_commands`
 
 List context-valid plugin commands.
 
@@ -3705,7 +3705,7 @@ Effective defaults: `{"address": null, "length": 0}`.
 
 ### plugin_repo tools
 
-#### `plugin_repo.check_updates`
+#### `plugin_repo_check_updates`
 
 Check plugin repository updates.
 
@@ -3722,7 +3722,7 @@ Check plugin repository updates.
 
 Effective defaults: `{"perform": false}`.
 
-#### `plugin_repo.plugin_action`
+#### `plugin_repo_plugin_action`
 
 Run install/uninstall/enable/disable action on repository plugin.
 
@@ -3750,7 +3750,7 @@ Run install/uninstall/enable/disable action on repository plugin.
 
 Effective defaults: `{}`.
 
-#### `plugin_repo.status`
+#### `plugin_repo_status`
 
 List plugin repositories and plugin states.
 
@@ -3766,7 +3766,7 @@ Effective defaults: `{}`.
 
 ### project tools
 
-#### `project.close`
+#### `project_close`
 
 Close tracked project.
 
@@ -3786,7 +3786,7 @@ Close tracked project.
 
 Effective defaults: `{}`.
 
-#### `project.create`
+#### `project_create`
 
 Create project.
 
@@ -3810,7 +3810,7 @@ Create project.
 
 Effective defaults: `{}`.
 
-#### `project.create_file`
+#### `project_create_file`
 
 Create project file from base64 data.
 
@@ -3844,7 +3844,7 @@ Create project file from base64 data.
 
 Effective defaults: `{"description": "", "folder_id": null}`.
 
-#### `project.create_folder`
+#### `project_create_folder`
 
 Create project folder.
 
@@ -3874,7 +3874,7 @@ Create project folder.
 
 Effective defaults: `{"description": "", "parent_folder_id": null}`.
 
-#### `project.list`
+#### `project_list`
 
 List project folders/files.
 
@@ -3894,7 +3894,7 @@ List project folders/files.
 
 Effective defaults: `{}`.
 
-#### `project.metadata_query`
+#### `project_metadata_query`
 
 Query project metadata.
 
@@ -3918,7 +3918,7 @@ Query project metadata.
 
 Effective defaults: `{}`.
 
-#### `project.metadata_remove`
+#### `project_metadata_remove`
 
 Remove project metadata.
 
@@ -3942,7 +3942,7 @@ Remove project metadata.
 
 Effective defaults: `{}`.
 
-#### `project.metadata_store`
+#### `project_metadata_store`
 
 Store project metadata.
 
@@ -3968,7 +3968,7 @@ Store project metadata.
 
 Effective defaults: `{}`.
 
-#### `project.open`
+#### `project_open`
 
 Open project.
 
@@ -3991,7 +3991,7 @@ Effective defaults: `{}`.
 
 ### search tools
 
-#### `search.all_constant`
+#### `search_all_constant`
 
 Find all constant occurrences in range.
 
@@ -4041,7 +4041,7 @@ Find all constant occurrences in range.
 
 Effective defaults: `{"limit": 100}`.
 
-#### `search.all_data`
+#### `search_all_data`
 
 Find all data/byte-pattern matches in range.
 
@@ -4091,7 +4091,7 @@ Find all data/byte-pattern matches in range.
 
 Effective defaults: `{"limit": 100}`.
 
-#### `search.all_text`
+#### `search_all_text`
 
 Find all text matches in range (regex optional).
 
@@ -4144,7 +4144,7 @@ Find all text matches in range (regex optional).
 
 Effective defaults: `{"limit": 100, "regex": false}`.
 
-#### `search.data`
+#### `search_data`
 
 Search for raw byte patterns (hex string).
 
@@ -4192,7 +4192,7 @@ Search for raw byte patterns (hex string).
 
 Effective defaults: `{"end": null, "limit": 100, "start": null}`.
 
-#### `search.next_constant`
+#### `search_next_constant`
 
 Find next constant occurrence.
 
@@ -4227,7 +4227,7 @@ Find next constant occurrence.
 
 Effective defaults: `{}`.
 
-#### `search.next_data`
+#### `search_next_data`
 
 Find next data/byte-pattern match.
 
@@ -4262,7 +4262,7 @@ Find next data/byte-pattern match.
 
 Effective defaults: `{}`.
 
-#### `search.next_text`
+#### `search_next_text`
 
 Find next text match.
 
@@ -4300,7 +4300,7 @@ Effective defaults: `{}`.
 
 ### section tools
 
-#### `section.add_user`
+#### `section_add_user`
 
 Add user section.
 
@@ -4347,7 +4347,7 @@ Add user section.
 
 Effective defaults: `{"align": 1, "entry_size": 1, "semantics": "DefaultSectionSemantics", "type_name": ""}`.
 
-#### `section.remove_user`
+#### `section_remove_user`
 
 Remove user section.
 
@@ -4374,7 +4374,7 @@ Effective defaults: `{}`.
 
 ### segment tools
 
-#### `segment.add_user`
+#### `segment_add_user`
 
 Add user segment.
 
@@ -4426,7 +4426,7 @@ Add user segment.
 
 Effective defaults: `{"contains_code": false, "contains_data": true, "data_length": 0, "data_offset": 0, "executable": false, "readable": true, "writable": false}`.
 
-#### `segment.remove_user`
+#### `segment_remove_user`
 
 Remove user segment.
 
@@ -4459,7 +4459,7 @@ Effective defaults: `{"length": 0}`.
 
 ### session tools
 
-#### `session.close`
+#### `session_close`
 
 Close one open session.
 
@@ -4479,7 +4479,7 @@ Close one open session.
 
 Effective defaults: `{}`.
 
-#### `session.list`
+#### `session_list`
 
 List open sessions.
 
@@ -4492,7 +4492,7 @@ List open sessions.
 
 Effective defaults: `{}`.
 
-#### `session.mode`
+#### `session_mode`
 
 Get session safety/determinism mode.
 
@@ -4512,7 +4512,7 @@ Get session safety/determinism mode.
 
 Effective defaults: `{}`.
 
-#### `session.open`
+#### `session_open`
 
 Open a binary and create a session.
 
@@ -4544,7 +4544,7 @@ Open a binary and create a session.
 
 Effective defaults: `{"deterministic": true, "options": {}, "read_only": true, "update_analysis": true}`.
 
-#### `session.open_bytes`
+#### `session_open_bytes`
 
 Open a binary session from base64-encoded bytes.
 
@@ -4579,7 +4579,7 @@ Open a binary session from base64-encoded bytes.
 
 Effective defaults: `{"deterministic": true, "filename": "binary_ninja_headless_mcp_bytes.bin", "options": {}, "read_only": true, "update_analysis": true}`.
 
-#### `session.open_existing`
+#### `session_open_existing`
 
 Open another session from an existing session's file.
 
@@ -4611,7 +4611,7 @@ Open another session from an existing session's file.
 
 Effective defaults: `{"deterministic": true, "options": {}, "read_only": true, "update_analysis": false}`.
 
-#### `session.set_mode`
+#### `session_set_mode`
 
 Update session safety/determinism mode.
 
@@ -4640,9 +4640,9 @@ Effective defaults: `{"deterministic": null, "read_only": null}`.
 
 ### task tools
 
-#### `task.analysis_update`
+#### `task_analysis_update`
 
-Alias of analysis.update: start tracked analysis and return task_id.
+Alias of analysis_update: start tracked analysis and return task_id.
 
 ```json
 {
@@ -4660,7 +4660,7 @@ Alias of analysis.update: start tracked analysis and return task_id.
 
 Effective defaults: `{}`.
 
-#### `task.cancel`
+#### `task_cancel`
 
 Cancel pending/running work. Terminal tasks are unchanged; drain before reuse.
 
@@ -4680,7 +4680,7 @@ Cancel pending/running work. Terminal tasks are unchanged; drain before reuse.
 
 Effective defaults: `{}`.
 
-#### `task.result`
+#### `task_result`
 
 Get terminal result (completed/failed/cancelled); pending tasks return an error.
 
@@ -4700,7 +4700,7 @@ Get terminal result (completed/failed/cancelled); pending tasks return an error.
 
 Effective defaults: `{}`.
 
-#### `task.search_text`
+#### `task_search_text`
 
 Start async search task.
 
@@ -4728,7 +4728,7 @@ Start async search task.
 
 Effective defaults: `{"limit": 50}`.
 
-#### `task.status`
+#### `task_status`
 
 Get task status.
 
@@ -4751,7 +4751,7 @@ Effective defaults: `{}`.
 
 ### transform tools
 
-#### `transform.inspect`
+#### `transform_inspect`
 
 Inspect/process transform pipeline. Requires session_id or path.
 
@@ -4780,7 +4780,7 @@ Effective defaults: `{"mode": "full", "path": null, "process": false, "session_i
 
 ### type tools
 
-#### `type.define_user`
+#### `type_define_user`
 
 Define user type from type source.
 
@@ -4810,7 +4810,7 @@ Define user type from type source.
 
 Effective defaults: `{"import_dependencies": true, "name": null}`.
 
-#### `type.export_to_library`
+#### `type_export_to_library`
 
 Export type into a type library.
 
@@ -4844,7 +4844,7 @@ Export type into a type library.
 
 Effective defaults: `{"import_dependencies": true, "name": null}`.
 
-#### `type.import_library_object`
+#### `type_import_library_object`
 
 Import object type from type library.
 
@@ -4871,7 +4871,7 @@ Import object type from type library.
 
 Effective defaults: `{"type_library_id": null}`.
 
-#### `type.import_library_type`
+#### `type_import_library_type`
 
 Import type from type library.
 
@@ -4898,7 +4898,7 @@ Import type from type library.
 
 Effective defaults: `{"type_library_id": null}`.
 
-#### `type.parse_declarations`
+#### `type_parse_declarations`
 
 Parse C declarations for types/variables/functions.
 
@@ -4937,7 +4937,7 @@ Parse C declarations for types/variables/functions.
 
 Effective defaults: `{"import_dependencies": true, "include_dirs": null, "options": null}`.
 
-#### `type.parse_string`
+#### `type_parse_string`
 
 Parse a single type string.
 
@@ -4964,7 +4964,7 @@ Parse a single type string.
 
 Effective defaults: `{"import_dependencies": true}`.
 
-#### `type.rename`
+#### `type_rename`
 
 Rename a type.
 
@@ -4992,7 +4992,7 @@ Rename a type.
 
 Effective defaults: `{}`.
 
-#### `type.undefine_user`
+#### `type_undefine_user`
 
 Undefine a user type.
 
@@ -5019,7 +5019,7 @@ Effective defaults: `{}`.
 
 ### type_archive tools
 
-#### `type_archive.create`
+#### `type_archive_create`
 
 Create and optionally attach a type archive.
 
@@ -5049,7 +5049,7 @@ Create and optionally attach a type archive.
 
 Effective defaults: `{"attach": true, "platform_name": null}`.
 
-#### `type_archive.get`
+#### `type_archive_get`
 
 Get one tracked type archive.
 
@@ -5073,7 +5073,7 @@ Get one tracked type archive.
 
 Effective defaults: `{}`.
 
-#### `type_archive.list`
+#### `type_archive_list`
 
 List attached type archives.
 
@@ -5093,7 +5093,7 @@ List attached type archives.
 
 Effective defaults: `{}`.
 
-#### `type_archive.open`
+#### `type_archive_open`
 
 Open and optionally attach a type archive.
 
@@ -5120,7 +5120,7 @@ Open and optionally attach a type archive.
 
 Effective defaults: `{"attach": true}`.
 
-#### `type_archive.pull`
+#### `type_archive_pull`
 
 Pull types from a type archive.
 
@@ -5152,7 +5152,7 @@ Pull types from a type archive.
 
 Effective defaults: `{}`.
 
-#### `type_archive.push`
+#### `type_archive_push`
 
 Push types to a type archive.
 
@@ -5184,7 +5184,7 @@ Push types to a type archive.
 
 Effective defaults: `{}`.
 
-#### `type_archive.references`
+#### `type_archive_references`
 
 Query archive incoming/outgoing references for one type.
 
@@ -5211,7 +5211,7 @@ Effective defaults: `{}`.
 
 ### type_library tools
 
-#### `type_library.create`
+#### `type_library_create`
 
 Create and optionally attach a type library.
 
@@ -5241,7 +5241,7 @@ Create and optionally attach a type library.
 
 Effective defaults: `{"add_to_view": true, "path": null}`.
 
-#### `type_library.get`
+#### `type_library_get`
 
 Get one tracked type library.
 
@@ -5265,7 +5265,7 @@ Get one tracked type library.
 
 Effective defaults: `{}`.
 
-#### `type_library.list`
+#### `type_library_list`
 
 List type libraries attached to the view.
 
@@ -5285,7 +5285,7 @@ List type libraries attached to the view.
 
 Effective defaults: `{}`.
 
-#### `type_library.load`
+#### `type_library_load`
 
 Load and optionally attach a type library.
 
@@ -5315,7 +5315,7 @@ Effective defaults: `{"add_to_view": true}`.
 
 ### uidf tools
 
-#### `uidf.clear_user_var_value`
+#### `uidf_clear_user_var_value`
 
 Clear function user variable value.
 
@@ -5356,7 +5356,7 @@ Clear function user variable value.
 
 Effective defaults: `{"after": true}`.
 
-#### `uidf.list_user_var_values`
+#### `uidf_list_user_var_values`
 
 List all user variable values for a function.
 
@@ -5383,7 +5383,7 @@ List all user variable values for a function.
 
 Effective defaults: `{}`.
 
-#### `uidf.parse_possible_value`
+#### `uidf_parse_possible_value`
 
 Parse user-informed possible value set string.
 
@@ -5417,7 +5417,7 @@ Parse user-informed possible value set string.
 
 Effective defaults: `{"here": null}`.
 
-#### `uidf.set_user_var_value`
+#### `uidf_set_user_var_value`
 
 Set function user variable value.
 
@@ -5469,7 +5469,7 @@ Effective defaults: `{"after": true}`.
 
 ### undo tools
 
-#### `undo.begin`
+#### `undo_begin`
 
 Begin undo transaction.
 
@@ -5489,7 +5489,7 @@ Begin undo transaction.
 
 Effective defaults: `{}`.
 
-#### `undo.commit`
+#### `undo_commit`
 
 Commit undo transaction.
 
@@ -5512,7 +5512,7 @@ Commit undo transaction.
 
 Effective defaults: `{"transaction_id": null}`.
 
-#### `undo.redo`
+#### `undo_redo`
 
 Perform redo.
 
@@ -5532,7 +5532,7 @@ Perform redo.
 
 Effective defaults: `{}`.
 
-#### `undo.revert`
+#### `undo_revert`
 
 Revert undo transaction.
 
@@ -5555,7 +5555,7 @@ Revert undo transaction.
 
 Effective defaults: `{"transaction_id": null}`.
 
-#### `undo.undo`
+#### `undo_undo`
 
 Perform undo.
 
@@ -5578,7 +5578,7 @@ Effective defaults: `{}`.
 
 ### value tools
 
-#### `value.flags_at`
+#### `value_flags_at`
 
 Get lifted IL flag read/write state at an address.
 
@@ -5620,7 +5620,7 @@ Get lifted IL flag read/write state at an address.
 
 Effective defaults: `{}`.
 
-#### `value.possible`
+#### `value_possible`
 
 Get IL possible value set at an address.
 
@@ -5673,7 +5673,7 @@ Get IL possible value set at an address.
 
 Effective defaults: `{"level": "mlil", "ssa": false}`.
 
-#### `value.reg`
+#### `value_reg`
 
 Get register value at/after an address.
 
@@ -5722,7 +5722,7 @@ Get register value at/after an address.
 
 Effective defaults: `{"after": false}`.
 
-#### `value.stack`
+#### `value_stack`
 
 Get stack contents at/after an address.
 
@@ -5779,7 +5779,7 @@ Effective defaults: `{"after": false}`.
 
 ### workflow tools
 
-#### `workflow.clone`
+#### `workflow_clone`
 
 Clone workflow.
 
@@ -5806,7 +5806,7 @@ Clone workflow.
 
 Effective defaults: `{"register": false}`.
 
-#### `workflow.describe`
+#### `workflow_describe`
 
 Describe workflow topology and settings.
 
@@ -5835,7 +5835,7 @@ Describe workflow topology and settings.
 
 Effective defaults: `{"activity": "", "immediate": true, "workflow_name": null}`.
 
-#### `workflow.graph`
+#### `workflow_graph`
 
 Summarize workflow graph.
 
@@ -5864,7 +5864,7 @@ Summarize workflow graph.
 
 Effective defaults: `{"activity": "", "sequential": false, "workflow_name": null}`.
 
-#### `workflow.insert`
+#### `workflow_insert`
 
 Insert activities before an activity.
 
@@ -5901,7 +5901,7 @@ Insert activities before an activity.
 
 Effective defaults: `{"workflow_name": null}`.
 
-#### `workflow.insert_after`
+#### `workflow_insert_after`
 
 Insert activities after an activity.
 
@@ -5938,7 +5938,7 @@ Insert activities after an activity.
 
 Effective defaults: `{"workflow_name": null}`.
 
-#### `workflow.list`
+#### `workflow_list`
 
 List registered workflows.
 
@@ -5951,7 +5951,7 @@ List registered workflows.
 
 Effective defaults: `{}`.
 
-#### `workflow.machine.control`
+#### `workflow_machine_control`
 
 Control workflow machine runtime.
 
@@ -5999,7 +5999,7 @@ Control workflow machine runtime.
 
 Effective defaults: `{"activities": null, "activity": null, "advanced": true, "enable": null, "incremental": false, "workflow_name": null}`.
 
-#### `workflow.machine.status`
+#### `workflow_machine_status`
 
 Get workflow machine status.
 
@@ -6022,7 +6022,7 @@ Get workflow machine status.
 
 Effective defaults: `{"workflow_name": null}`.
 
-#### `workflow.remove`
+#### `workflow_remove`
 
 Remove workflow activity.
 
@@ -6052,7 +6052,7 @@ Effective defaults: `{"workflow_name": null}`.
 
 ### xref tools
 
-#### `xref.code_refs_from`
+#### `xref_code_refs_from`
 
 Code references from an address.
 
@@ -6087,7 +6087,7 @@ Code references from an address.
 
 Effective defaults: `{"length": null}`.
 
-#### `xref.code_refs_to`
+#### `xref_code_refs_to`
 
 Code references to an address.
 
@@ -6126,7 +6126,7 @@ Code references to an address.
 
 Effective defaults: `{"limit": 100, "offset": 0}`.
 
-#### `xref.data_refs_from`
+#### `xref_data_refs_from`
 
 Data references from an address.
 
@@ -6161,7 +6161,7 @@ Data references from an address.
 
 Effective defaults: `{"length": null}`.
 
-#### `xref.data_refs_to`
+#### `xref_data_refs_to`
 
 Data references to an address.
 

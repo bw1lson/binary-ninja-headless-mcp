@@ -35,7 +35,7 @@ CATALOG = {item["name"]: item for item in TOOL_DEFINITIONS}
 
 # Defined independently of runtime observations: forgotten variants remain missing.
 REQUIRED_VARIANTS = {
-    "workflow.machine.control": {
+    "workflow_machine_control": {
         "breakpoint_delete",
         "breakpoint_set",
         "disable",
@@ -49,7 +49,7 @@ REQUIRED_VARIANTS = {
         "resume",
         "run",
     },
-    "plugin.execute": {
+    "plugin_execute": {
         "native-" + kind
         for kind in (
             "default",
@@ -66,8 +66,8 @@ REQUIRED_VARIANTS = {
             "project",
         )
     },
-    "debug.parse_and_apply": {"native-registered", "native-dwarf", "native-separate-debug"},
-    "plugin_repo.plugin_action": {
+    "debug_parse_and_apply": {"native-registered", "native-dwarf", "native-separate-debug"},
+    "plugin_repo_plugin_action": {
         "native-install",
         "native-enable",
         "native-disable",
@@ -75,73 +75,73 @@ REQUIRED_VARIANTS = {
         "restart-after-disable",
         "restart-after-uninstall",
     },
-    "il.function": {
+    "il_function": {
         level + suffix
         for level in ("llil", "mlil", "hlil")
         for suffix in ("", "_ssa", "_page", "_ssa_page")
     },
-    "transform.inspect": {
+    "transform_inspect": {
         prefix + mode + suffix
         for prefix in ("", "path_")
         for mode in ("disabled", "interactive", "full")
         for suffix in ("_inspect", "_process")
     },
-    "memory.reader_read": {
+    "memory_reader_read": {
         f"{endian}-{width}" for endian in ("little", "big") for width in (1, 2, 4, 8)
     },
-    "memory.writer_write": {
+    "memory_writer_write": {
         f"{endian}-{width}{suffix}"
         for endian in ("little", "big")
         for width in (1, 2, 4, 8)
         for suffix in ("", "-bytes")
     },
-    "analysis.set_hold": {"hold", "release"},
-    "binja.eval": {"expression", "statements"},
-    "binja.call": {"property", "function"},
-    "session.set_mode": {"True", "False"},
-    "baseaddr.detect": {"instruction-bounded", "sampling-known-base"},
-    "uidf.set_user_var_value": {"after-True", "after-False"},
-    "uidf.clear_user_var_value": {"after-True", "after-False"},
+    "analysis_set_hold": {"hold", "release"},
+    "binja_eval": {"expression", "statements"},
+    "binja_call": {"property", "function"},
+    "session_set_mode": {"True", "False"},
+    "baseaddr_detect": {"instruction-bounded", "sampling-known-base"},
+    "uidf_set_user_var_value": {"after-True", "after-False"},
+    "uidf_clear_user_var_value": {"after-True", "after-False"},
 }
 
 REQUIRED_VARIANTS.update(
     {
         name: {level + suffix for level in ("llil", "mlil", "hlil") for suffix in ("", "_ssa")}
         for name in (
-            "binary.get_function_il_at",
-            "il.instruction_by_addr",
-            "il.address_to_index",
-            "il.index_to_address",
-            "value.possible",
+            "binary_get_function_il_at",
+            "il_instruction_by_addr",
+            "il_address_to_index",
+            "il_index_to_address",
+            "value_possible",
         )
     }
 )
-REQUIRED_VARIANTS.update({name: {"before", "after"} for name in ("value.reg", "value.stack")})
+REQUIRED_VARIANTS.update({name: {"before", "after"} for name in ("value_reg", "value_stack")})
 REQUIRED_VARIANTS.update(
     {
         name: {"mlil", "hlil"}
         for name in (
-            "function.var_refs",
-            "function.var_refs_from",
-            "function.ssa_var_def_use",
-            "function.ssa_memory_def_use",
+            "function_var_refs",
+            "function_var_refs_from",
+            "function_ssa_var_def_use",
+            "function_ssa_memory_def_use",
         )
     }
 )
 REQUIRED_VARIANTS.update(
-    {name: {"view_arch", "explicit"} for name in ("arch.assemble", "arch.disasm_bytes")}
+    {name: {"view_arch", "explicit"} for name in ("arch_assemble", "arch_disasm_bytes")}
 )
 REQUIRED_VARIANTS.update(
     {
-        "il.rewrite.noop_replace": {"llil", "mlil", "hlil"},
-        "il.rewrite.translate_identity": {"llil", "mlil"},
-        "task.cancel": {"running-cancelled", "native-analysis-drained"},
-        "task.result": {"analysis", "native-cancelled"},
+        "il_rewrite_noop_replace": {"llil", "mlil", "hlil"},
+        "il_rewrite_translate_identity": {"llil", "mlil"},
+        "task_cancel": {"running-cancelled", "native-analysis-drained"},
+        "task_result": {"analysis", "native-cancelled"},
     }
 )
 REQUIRED_VARIANTS.update(
     {
-        "binary." + name: {"fixture_contents", "pagination"}
+        "binary_" + name: {"fixture_contents", "pagination"}
         for name in ("functions", "strings", "sections", "segments", "symbols", "data_vars")
     }
 )
@@ -422,9 +422,9 @@ class Runner:
                 raise VerificationFailure(
                     f"{name}: CLI arguments/output differ from actual native MCP response"
                 )
-        if name in {"session.open", "session.open_bytes", "session.open_existing"}:
+        if name in {"session_open", "session_open_bytes", "session_open_existing"}:
             self.opened_sessions.add(payload["session_id"])
-        elif name == "session.close":
+        elif name == "session_close":
             self.opened_sessions.discard(arguments["session_id"])
         self._successful_calls.setdefault(name, []).append(request_id)
         return payload
@@ -467,7 +467,7 @@ class Runner:
         arguments = {"code": code}
         if self.session_id:
             arguments["session_id"] = self.session_id
-        return self.tool("binja.eval", **arguments)["result"]
+        return self.tool("binja_eval", **arguments)["result"]
 
     def refresh_symbols(self) -> None:
         symbols = self.native("{s.raw_name: s.address for s in bv.get_symbols()}")
@@ -487,14 +487,14 @@ class Runner:
             "deterministic": True,
             **open_options,
         }
-        opened = self.tool("session.open", **params)
+        opened = self.tool("session_open", **params)
         self.session_id = opened["session_id"]
         try:
             self.refresh_symbols()
             yield self
         finally:
             try:
-                self.tool("session.close", session_id=self.session_id)
+                self.tool("session_close", session_id=self.session_id)
             finally:
                 self.session_id, self.function_start, self.symbols = old
 
@@ -555,7 +555,7 @@ class Runner:
         errors = []
         for session in sorted(self.opened_sessions):
             try:
-                self.tool("session.close", session_id=session)
+                self.tool("session_close", session_id=session)
             except Exception as exc:
                 errors.append(str(exc))
         if errors:
@@ -565,16 +565,16 @@ class Runner:
 def settle(r: Runner, task: dict[str, Any]) -> dict[str, Any]:
     deadline = time.monotonic() + r.timeout
     while time.monotonic() < deadline:
-        state = r.tool("task.status", task_id=task["task_id"])
+        state = r.tool("task_status", task_id=task["task_id"])
         if state["result_ready"]:
             r.record(
-                "task.status",
+                "task_status",
                 "terminal",
                 state["status"] in {"completed", "cancelled"},
                 "Task reaches a successful or cancelled terminal state",
                 state,
             )
-            return r.tool("task.result", task_id=task["task_id"])
+            return r.tool("task_result", task_id=task["task_id"])
         time.sleep(0.02)
     raise VerificationFailure(f"task did not terminate: {task}")
 
@@ -582,133 +582,133 @@ def settle(r: Runner, task: dict[str, Any]) -> dict[str, Any]:
 def run_core(r: Runner) -> None:
     sid = r.session_id
     session = {"session_id": sid}
-    r.verify("health.ping", "healthy", {}, lambda p: p.get("status") == "ok", "Backend is healthy")
-    info = r.tool("binja.info")
+    r.verify("health_ping", "healthy", {}, lambda p: p.get("status") == "ok", "Backend is healthy")
+    info = r.tool("binja_info")
     version = r.native("bn.core_version()")
     r.record(
-        "binja.info",
+        "binja_info",
         "native-version",
         info["version"] == version and "fake" not in version.lower(),
         "Reported version equals real licensed native runtime",
         info,
     )
     r.verify(
-        "binja.eval",
+        "binja_eval",
         "expression",
         {**session, "code": "21 * 2"},
         lambda p: p["result"] == 42,
         "Native expression evaluation returns 42",
     )
     r.verify(
-        "binja.eval",
+        "binja_eval",
         "statements",
         {**session, "code": "print('CLI_STDOUT'); _ = 6 * 7"},
         lambda p: p["result"] == 42 and p["stdout"] == "CLI_STDOUT\n",
         "Statement result and captured stdout are preserved",
     )
     r.verify(
-        "binja.call",
+        "binja_call",
         "property",
         {**session, "target": "bv.start"},
         lambda p: p["result"] == r.native("bv.start"),
         "API property equals native view start",
     )
     r.verify(
-        "binja.call",
+        "binja_call",
         "function",
         {"target": "bn.core_version"},
         lambda p: p["result"] == version,
         "API callable returns native core version",
     )
     r.verify(
-        "mcp.response_format",
+        "mcp_response_format",
         "contract",
         {},
         lambda p: p["canonical_field"] == "structuredContent" and p["error_field"] == "isError",
         "Response descriptor identifies fields present in actual CLI batches",
     )
-    listed = r.tool("session.list")
+    listed = r.tool("session_list")
     r.record(
-        "session.list",
+        "session_list",
         "open-session",
         any(x["session_id"] == sid for x in listed["sessions"]),
         "Session listing includes the exact opened fixture",
         listed,
     )
     for read_only in (True, False):
-        r.tool("session.set_mode", **session, read_only=read_only)
-        mode = r.tool("session.mode", **session)
+        r.tool("session_set_mode", **session, read_only=read_only)
+        mode = r.tool("session_mode", **session)
         r.record(
-            "session.set_mode",
+            "session_set_mode",
             str(read_only),
             mode["read_only"] == read_only,
             "Mode change is observed by separate mode readback",
             mode,
         )
         r.record(
-            "session.mode",
+            "session_mode",
             str(read_only),
             mode["read_only"] == read_only,
             "Mode query reflects requested access policy",
             mode,
         )
-    source = r.tool("session.open_existing", source_session_id=sid, update_analysis=True)
+    source = r.tool("session_open_existing", source_session_id=sid, update_analysis=True)
     r.record(
-        "session.open_existing",
+        "session_open_existing",
         "reopen-original",
         source["function_count"] >= 3,
         "Reopened input has the known compiled functions",
         source,
     )
-    r.tool("session.close", session_id=source["session_id"])
-    listing = r.tool("session.list")
+    r.tool("session_close", session_id=source["session_id"])
+    listing = r.tool("session_list")
     r.record(
-        "session.close",
+        "session_close",
         "removed",
         source["session_id"] not in [x["session_id"] for x in listing["sessions"]],
         "Closed session is absent",
         listing,
     )
     uploaded = r.tool(
-        "session.open_bytes",
+        "session_open_bytes",
         data_base64=base64.b64encode(r.fixture.read_bytes()).decode(),
         filename=r.fixture.name,
         update_analysis=True,
         read_only=False,
     )
     r.record(
-        "session.open_bytes",
+        "session_open_bytes",
         "real-elf",
         uploaded["function_count"] >= 3,
         "Uploaded bytes produce the known ELF functions",
         uploaded,
     )
-    r.tool("session.close", session_id=uploaded["session_id"])
-    r.tool("analysis.update_and_wait", **session)
-    state = r.tool("analysis.status", **session)
+    r.tool("session_close", session_id=uploaded["session_id"])
+    r.tool("analysis_update_and_wait", **session)
+    state = r.tool("analysis_status", **session)
     r.record(
-        "analysis.update_and_wait",
+        "analysis_update_and_wait",
         "completed",
         state.get("status") == "completed",
         "Synchronous update reaches completed managed state",
         state,
     )
     r.record(
-        "analysis.status",
+        "analysis_status",
         "native-state",
         "Idle" in str(state.get("state")),
         "Analyzed fixture native state is Idle",
         state,
     )
-    progress = r.tool("analysis.progress", **session)
+    progress = r.tool("analysis_progress", **session)
     r.record(
-        "analysis.progress",
+        "analysis_progress",
         "native-progress",
         progress.get("progress") == state.get("progress"),
         "Progress matches independent status query",
         progress,
     )
-    for tool_name in ("analysis.update", "task.analysis_update"):
+    for tool_name in ("analysis_update", "task_analysis_update"):
         task = r.tool(tool_name, **session)
         result = settle(r, task)
         r.record(
@@ -719,38 +719,38 @@ def run_core(r: Runner) -> None:
             result,
         )
         r.record(
-            "task.result",
+            "task_result",
             "analysis",
             result["status"] == "completed" and isinstance(result.get("result"), dict),
             "Completed task carries analysis result",
             result,
         )
     search = settle(
-        r, r.tool("task.search_text", **session, query="BINJA_CLI_NATIVE_SENTINEL", limit=100)
+        r, r.tool("task_search_text", **session, query="BINJA_CLI_NATIVE_SENTINEL", limit=100)
     )
     r.record(
-        "task.search_text",
+        "task_search_text",
         "known-function",
         search["status"] == "completed" and bool(search["result"].get("items")),
         "Search task finds known function name",
         search,
     )
-    r.tool("analysis.set_hold", **session, hold=True)
+    r.tool("analysis_set_hold", **session, hold=True)
     held = r.native(
         f"bv.get_function_at({r.function_start}).reanalyze(); _ = bv.analysis_progress.state.name"
     )
     r.record(
-        "analysis.set_hold",
+        "analysis_set_hold",
         "hold",
         held == "HoldState",
         "Native reanalysis enters HoldState while held",
         held,
     )
-    r.tool("analysis.set_hold", **session, hold=False)
-    r.tool("analysis.update_and_wait", **session)
-    released = r.tool("analysis.status", **session)
+    r.tool("analysis_set_hold", **session, hold=False)
+    r.tool("analysis_update_and_wait", **session)
+    released = r.tool("analysis_status", **session)
     r.record(
-        "analysis.set_hold",
+        "analysis_set_hold",
         "release",
         released["status"] == "completed",
         "Native reanalysis completes after release",
@@ -759,51 +759,51 @@ def run_core(r: Runner) -> None:
     from .cli_verify_stateful import run_cancellation
 
     run_cancellation(r)
-    r.tool("analysis.abort", **session)
-    aborted = r.tool("analysis.status", **session)
+    r.tool("analysis_abort", **session)
+    aborted = r.tool("analysis_status", **session)
     r.record(
-        "analysis.abort",
+        "analysis_abort",
         "native-abort",
         aborted["is_aborted"] is True,
         "Abort sets native aborted state",
         aborted,
     )
-    r.tool("analysis.update_and_wait", **session)
+    r.tool("analysis_update_and_wait", **session)
 
 
 def run_database(r: Runner) -> None:
     with r.isolated():
         session = {"session_id": r.session_id}
         path = r.output / "persistent.bndb"
-        r.tool("metadata.store", **session, key="cli-persistence", value={"answer": 42})
-        created = r.tool("database.create_bndb", **session, path=str(path))
+        r.tool("metadata_store", **session, key="cli-persistence", value={"answer": 42})
+        created = r.tool("database_create_bndb", **session, path=str(path))
         r.record(
-            "database.create_bndb",
+            "database_create_bndb",
             "disk",
             created["created"] and path.is_file() and path.stat().st_size > 0,
             "Native database is created on disk",
             created,
         )
-        r.tool("database.write_global", **session, key="cli-global", value="native-value")
-        readback = r.tool("database.read_global", **session, key="cli-global")
+        r.tool("database_write_global", **session, key="cli-global", value="native-value")
+        readback = r.tool("database_read_global", **session, key="cli-global")
         r.record(
-            "database.write_global",
+            "database_write_global",
             "readback",
             readback["value"] == "native-value",
             "Database global persists exact value",
             readback,
         )
         r.record(
-            "database.read_global",
+            "database_read_global",
             "readback",
             readback["value"] == "native-value",
             "Global query recovers expected value",
             readback,
         )
-        saved = r.tool("database.save_auto_snapshot", **session)
-        snapshots = r.tool("database.snapshots", **session)
+        saved = r.tool("database_save_auto_snapshot", **session)
+        snapshots = r.tool("database_snapshots", **session)
         r.record(
-            "database.save_auto_snapshot",
+            "database_save_auto_snapshot",
             "snapshot",
             saved["saved"] and len(snapshots["items"]) >= 1,
             "Saved snapshot appears in native database listing",
@@ -811,42 +811,42 @@ def run_database(r: Runner) -> None:
         )
         native_ids = r.native("[s.id for s in bv.file.database.snapshots]")
         r.record(
-            "database.snapshots",
+            "database_snapshots",
             "native-ids",
             [s["id"] for s in snapshots["items"]] == native_ids,
             "Snapshot identifiers match direct native database",
             snapshots,
         )
-        info = r.tool("database.info", **session)
+        info = r.tool("database_info", **session)
         r.record(
-            "database.info",
+            "database_info",
             "native-count",
             info["snapshot_count"] == len(native_ids),
             "Database summary count matches native snapshots",
             info,
         )
-        reopened = r.tool("session.open", path=str(path), read_only=False, update_analysis=True)
-        value = r.tool("metadata.query", session_id=reopened["session_id"], key="cli-persistence")
+        reopened = r.tool("session_open", path=str(path), read_only=False, update_analysis=True)
+        value = r.tool("metadata_query", session_id=reopened["session_id"], key="cli-persistence")
         r.record(
-            "database.create_bndb",
+            "database_create_bndb",
             "reopen",
             value["value"] == {"answer": 42},
             "Database reopened in a new session preserves metadata",
             value,
         )
-        value = r.tool("database.read_global", session_id=reopened["session_id"], key="cli-global")
+        value = r.tool("database_read_global", session_id=reopened["session_id"], key="cli-global")
         r.record(
-            "database.write_global",
+            "database_write_global",
             "reopen",
             value["value"] == "native-value",
             "Database global survives reopen",
             value,
         )
-        r.tool("session.close", session_id=reopened["session_id"])
+        r.tool("session_close", session_id=reopened["session_id"])
         destination = r.output / "saved-binary"
-        saved = r.tool("binary.save", **session, path=str(destination))
+        saved = r.tool("binary_save", **session, path=str(destination))
         r.record(
-            "binary.save",
+            "binary_save",
             "byte-identity",
             saved["saved"] and sha256(destination) == sha256(r.fixture),
             "Saving unchanged fixture preserves its exact input bytes",
@@ -877,13 +877,13 @@ def run_rewrites(r: Runner) -> None:
         with r.isolated():
             args = {"session_id": r.session_id, "function_start": r.function_start, "level": level}
             expr = f"bv.get_function_at({r.function_start}).{native_attr}"
-            caps = r.tool("il.rewrite.capabilities", **args)
+            caps = r.tool("il_rewrite_capabilities", **args)
             native = r.native(
                 f"{{'replace_expr':hasattr({expr},'replace_expr'), "
                 f"'translate':hasattr({expr},'translate')}}"
             )
             r.record(
-                "il.rewrite.capabilities",
+                "il_rewrite_capabilities",
                 level,
                 caps["supports_replace_expr"] == native["replace_expr"]
                 and caps["supports_translate"] == native["translate"],
@@ -891,10 +891,10 @@ def run_rewrites(r: Runner) -> None:
                 caps,
             )
             before = native_il_signature(r, expr)
-            r.tool("il.rewrite.noop_replace", **args, index=0)
+            r.tool("il_rewrite_noop_replace", **args, index=0)
             after = native_il_signature(r, expr)
             r.record(
-                "il.rewrite.noop_replace",
+                "il_rewrite_noop_replace",
                 level,
                 before == after and bool(before),
                 "No-op rewrite preserves every native IL instruction",
@@ -915,7 +915,7 @@ kind.translate = capture
 _ = True
 """)
                 try:
-                    translated = r.tool("il.rewrite.translate_identity", **args)
+                    translated = r.tool("il_rewrite_translate_identity", **args)
                     observed = r.native(f"""def semantic(value):
     if hasattr(value, 'operation') and hasattr(value, 'operands'):
         return [value.address, value.operation.name, value.size,
@@ -929,7 +929,7 @@ _ = {{'source': [semantic(i) for i in {expr}.instructions],
      'translated': [semantic(i) for i in bn._cli_translation_capture.instructions]}}
 """)
                     r.record(
-                        "il.rewrite.translate_identity",
+                        "il_rewrite_translate_identity",
                         level,
                         bool(observed["source"])
                         and observed["source"] == observed["translated"]
@@ -945,13 +945,13 @@ _ = {{'source': [semantic(i) for i in {expr}.instructions],
     with r.isolated():
         args = {"session_id": r.session_id, "function_start": r.function_start}
         parsed = r.tool(
-            "uidf.parse_possible_value",
+            "uidf_parse_possible_value",
             session_id=r.session_id,
             value="0x2a",
             state="ConstantValue",
         )
         r.record(
-            "uidf.parse_possible_value",
+            "uidf_parse_possible_value",
             "constant",
             "2a" in str(parsed["parsed"]).lower() or "42" in str(parsed["parsed"]),
             "Possible value parser preserves constant 42",
@@ -961,13 +961,13 @@ _ = {{'source': [semantic(i) for i in {expr}.instructions],
         varargs = {**args, "variable_name": name, "def_addr": r.function_start}
         for after in (True, False):
             r.tool(
-                "uidf.set_user_var_value",
+                "uidf_set_user_var_value",
                 **varargs,
                 value="0x2a",
                 state="ConstantValue",
                 after=after,
             )
-            listed = r.tool("uidf.list_user_var_values", **args)
+            listed = r.tool("uidf_list_user_var_values", **args)
             raw = r.native(
                 "import ctypes\nfrom binaryninja import _binaryninjacore as core\n"
                 f"f=bv.get_function_at({r.function_start})\ncount=ctypes.c_ulonglong()\n"
@@ -984,23 +984,23 @@ _ = {{'source': [semantic(i) for i in {expr}.instructions],
                 and listed["items"][0]["definitions"][0]["value"] == "<const 0x2a>"
             )
             r.record(
-                "uidf.set_user_var_value",
+                "uidf_set_user_var_value",
                 f"after-{after}",
                 raw == expected and correct_listing,
                 "Native value is exactly 42 at requested definition site and before/after position",
                 {"native": raw, "listing": listed},
             )
             r.record(
-                "uidf.list_user_var_values",
+                "uidf_list_user_var_values",
                 f"after-{after}",
                 correct_listing,
                 "Listing contains exact constant, variable, and definition address",
                 listed,
             )
-            r.tool("uidf.clear_user_var_value", **varargs, after=after)
-            empty = r.tool("uidf.list_user_var_values", **args)
+            r.tool("uidf_clear_user_var_value", **varargs, after=after)
+            empty = r.tool("uidf_list_user_var_values", **args)
             r.record(
-                "uidf.clear_user_var_value",
+                "uidf_clear_user_var_value",
                 f"after-{after}",
                 not empty["items"],
                 "Clearing parameter value removes it from native listing",
@@ -1016,13 +1016,13 @@ buf=bytearray(0x10000)
 for n in range(64):
     offset=0x1000+n*64
     target=base+0x8000+n*64
-    code=arch.assemble(f'push rbp\nmov rbp, rsp\nmovzx eax, byte [{{target}}]\npop rbp\nret',offset)
+    code=arch_assemble(f'push rbp\nmov rbp, rsp\nmovzx eax, byte [{{target}}]\npop rbp\nret',offset)
     buf[offset:offset+len(code)]=code
     buf[0x7000+n*8:0x7008+n*8]=target.to_bytes(8,'little')
     msg=f'BASE_DETECTION_UNIQUE_SENTINEL_{{n:04d}}_abcdefghijklmnop'.encode()+b'\0'
     buf[0x8000+n*64:0x8000+n*64+len(msg)]=msg
 calls='\n'.join(f'call {{0x1000+n*64}}' for n in range(64))
-entry=arch.assemble('push rbp\nmov rbp, rsp\n'+calls+'\npop rbp\nret',0)
+entry=arch_assemble('push rbp\nmov rbp, rsp\n'+calls+'\npop rbp\nret',0)
 buf[:len(entry)]=entry
 from pathlib import Path
 Path({str(firmware)!r}).write_bytes(buf)
@@ -1041,7 +1041,7 @@ _=len(buf)
         )
     )
     opened = r.tool(
-        "session.open",
+        "session_open",
         path=str(firmware),
         update_analysis=False,
         read_only=False,
@@ -1059,7 +1059,7 @@ _=len(buf)
     }
     try:
         instruction = r.tool(
-            "baseaddr.detect",
+            "baseaddr_detect",
             **args,
             algorithm="instruction",
             analysis="basic",
@@ -1067,16 +1067,16 @@ _=len(buf)
             max_pointers=128,
         )
         r.record(
-            "baseaddr.detect",
+            "baseaddr_detect",
             "instruction-bounded",
             instruction["score_count"] == len(instruction["scores"])
             and instruction["detected"] == bool(instruction["scores"]),
             "Bounded native instruction algorithm reports coherent candidate presence",
             instruction,
         )
-        sampled = r.tool("baseaddr.detect", **args, algorithm="sampling")
+        sampled = r.tool("baseaddr_detect", **args, algorithm="sampling")
         r.record(
-            "baseaddr.detect",
+            "baseaddr_detect",
             "sampling-known-base",
             sampled["detected"]
             and sampled["preferred_base_address"] == "0x400000"
@@ -1085,26 +1085,26 @@ _=len(buf)
             "Native sampling recovers known firmware base with all 64 string pointers",
             sampled,
         )
-        reasons = r.tool("baseaddr.reasons", session_id=opened["session_id"], base_address=0x400000)
+        reasons = r.tool("baseaddr_reasons", session_id=opened["session_id"], base_address=0x400000)
         expected = {(0x400000 + 0x8000 + i * 64, 0x8000 + i * 64) for i in range(64)}
         actual = {(int(x["pointer"], 0), int(x["offset"], 0)) for x in reasons["items"]}
         r.record(
-            "baseaddr.reasons",
+            "baseaddr_reasons",
             "known-pointer-offset-pairs",
             expected <= actual and reasons["count"] == len(reasons["items"]),
             "Every known firmware pointer and corresponding string offset explains candidate",
             reasons,
         )
-        aborted = r.tool("baseaddr.abort", session_id=opened["session_id"])
+        aborted = r.tool("baseaddr_abort", session_id=opened["session_id"])
         r.record(
-            "baseaddr.abort",
+            "baseaddr_abort",
             "abort-context",
             aborted["aborted"] is True,
             "Native detector reports aborted state",
             aborted,
         )
     finally:
-        r.tool("session.close", session_id=opened["session_id"])
+        r.tool("session_close", session_id=opened["session_id"])
 
 
 @contextlib.contextmanager
@@ -1249,7 +1249,7 @@ def run_matrix(  # noqa: PLR0912, PLR0915 - isolated matrix lifecycle
                             wire_observer=wire_observer,
                         )
                         try:
-                            runner.tool("binja.eval", code="bn._init_plugins(); _ = True")
+                            runner.tool("binja_eval", code="bn._init_plugins(); _ = True")
                             for group in groups:
                                 if group not in callbacks:
                                     errors.append(
@@ -1276,7 +1276,7 @@ def run_matrix(  # noqa: PLR0912, PLR0915 - isolated matrix lifecycle
                                         )
                                     ):
                                         runner.record(
-                                            "session.open",
+                                            "session_open",
                                             "fixture",
                                             {"cli_add", "cli_branch", "main"}
                                             <= runner.symbols.keys(),

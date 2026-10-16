@@ -150,7 +150,7 @@ class BinjaBackend(LifecycleMixin):
         deterministic: bool = True,
     ) -> dict[str, Any]:
         with self._operation_scope(
-            "session.open_existing", {"source_session_id": source_session_id}
+            "session_open_existing", {"source_session_id": source_session_id}
         ):
             source = self._get_record(source_session_id)
             source_path = self._safe_attr_chain(source.view, "file.filename")
@@ -269,7 +269,7 @@ class BinjaBackend(LifecycleMixin):
         raise BinjaBackendError("backend is shutting down")
 
     def list_sessions(self) -> dict[str, Any]:
-        with self._operation_scope("session.list", {}) as records:
+        with self._operation_scope("session_list", {}) as records:
             with self._lock:
                 ids = {record.session_id for record in records}
                 summaries = [
@@ -2474,7 +2474,7 @@ class BinjaBackend(LifecycleMixin):
         }
 
     def eval_code(self, code: str, *, session_id: str | None = None) -> dict[str, Any]:
-        with self._operation_scope("binja.eval", {"session_id": session_id}) as records:
+        with self._operation_scope("binja_eval", {"session_id": session_id}) as records:
             return self._eval_code(code, session_id=session_id, records=records)
 
     def _eval_code(
@@ -2524,7 +2524,7 @@ class BinjaBackend(LifecycleMixin):
         record, run = self._begin_analysis(session_id)
         try:
             return self._submit_task(
-                kind="analysis.update_and_wait",
+                kind="analysis_update_and_wait",
                 session_id=session_id,
                 func=lambda: self._run_analysis(record, run),
                 analysis_run=run,
@@ -2547,7 +2547,7 @@ class BinjaBackend(LifecycleMixin):
         def run() -> dict[str, Any]:
             return self.search_text(session_id, query, limit=limit)
 
-        return self._submit_task(kind="binary.search_text", session_id=session_id, func=run)
+        return self._submit_task(kind="binary_search_text", session_id=session_id, func=run)
 
     def task_status(self, task_id: str) -> dict[str, Any]:
         with self._lock:

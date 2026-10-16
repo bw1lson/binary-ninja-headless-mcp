@@ -25,13 +25,13 @@ def test_registry_ledger_requires_semantic_assertions(tmp_path, monkeypatch):
     fixture = tmp_path / "sample"
     fixture.write_bytes(b"fixture")
     runner = Runner(fixture, tmp_path / "evidence", mode="inprocess", argument_style="json")
-    runner.events.append({"tool": "health.ping"})
+    runner.events.append({"tool": "health_ping"})
     summary = runner.summary()
     assert summary["catalog_count"] == len(CATALOG)
     assert summary["verified_count"] == 0
-    assert summary["ledger"]["health.ping"]["status"] == "missing"
+    assert summary["ledger"]["health_ping"]["status"] == "missing"
     runner.record(
-        "health.ping", "known-result", True, "Observed expected native result", {"status": "ok"}
+        "health_ping", "known-result", True, "Observed expected native result", {"status": "ok"}
     )
     summary = runner.summary()
     assert summary["verified_count"] == 0  # An invented assertion is not tool coverage.
@@ -41,7 +41,7 @@ def test_registry_ledger_requires_semantic_assertions(tmp_path, monkeypatch):
         return 0
 
     monkeypatch.setattr("binary_ninja_headless_mcp.binja_cli.main", main)
-    runner.verify("health.ping", "real-command", {}, lambda p: p["status"] == "ok", "Healthy")
+    runner.verify("health_ping", "real-command", {}, lambda p: p["status"] == "ok", "Healthy")
     assert runner.summary()["verified_count"] == 1
     assert not summary["complete"]
 
@@ -50,10 +50,10 @@ def test_failure_cannot_be_hidden_by_prior_success(tmp_path):
     fixture = tmp_path / "sample"
     fixture.write_bytes(b"fixture")
     runner = Runner(fixture, tmp_path / "evidence", mode="inprocess", argument_style="json")
-    runner.record("health.ping", "earlier", True, "known healthy result")
+    runner.record("health_ping", "earlier", True, "known healthy result")
     with pytest.raises(VerificationFailure):
-        runner.record("health.ping", "later", False, "unexpected result", {"status": "broken"})
-    assert runner.summary()["ledger"]["health.ping"]["status"] == "failed"
+        runner.record("health_ping", "later", False, "unexpected result", {"status": "broken"})
+    assert runner.summary()["ledger"]["health_ping"]["status"] == "failed"
     assertions = [
         json.loads(line) for line in (runner.output / "assertions.jsonl").read_text().splitlines()
     ]

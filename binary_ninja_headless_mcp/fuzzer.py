@@ -36,34 +36,34 @@ ADDRESS_KEYS = {
 }
 
 DEFERRED_TOOLS = {
-    "loader.rebase",
-    "project.close",
-    "session.close",
+    "loader_rebase",
+    "project_close",
+    "session_close",
 }
 
 HEAVY_RANDOM_TOOLS = {
-    "analysis.update_and_wait",
-    "baseaddr.detect",
-    "task.analysis_update",
+    "analysis_update_and_wait",
+    "baseaddr_detect",
+    "task_analysis_update",
 }
 
 RANDOM_EXCLUDED_TOOLS = {
-    "database.create_bndb",
-    "project.create",
-    "project.open",
-    "session.open",
-    "session.open_bytes",
-    "session.open_existing",
-    "type_archive.create",
-    "type_archive.open",
-    "type_library.create",
-    "type_library.load",
+    "database_create_bndb",
+    "project_create",
+    "project_open",
+    "session_open",
+    "session_open_bytes",
+    "session_open_existing",
+    "type_archive_create",
+    "type_archive_open",
+    "type_library_create",
+    "type_library_load",
 }
 
 EXTERNAL_ACTION_TOOLS = {
-    "plugin.execute",
-    "plugin_repo.check_updates",
-    "plugin_repo.plugin_action",
+    "plugin_execute",
+    "plugin_repo_check_updates",
+    "plugin_repo_plugin_action",
 }
 
 _MISSING = object()
@@ -294,38 +294,38 @@ class McpFeatureFuzzer:
 
     def _ordered_tool_names(self, tools_by_name: dict[str, dict[str, Any]]) -> list[str]:
         seed_priority = [
-            "health.ping",
-            "binja.info",
-            "session.open",
-            "analysis.update",
-            "analysis.progress",
-            "binary.summary",
-            "binary.functions",
-            "binary.strings",
-            "binary.sections",
-            "binary.segments",
-            "binary.symbols",
-            "binary.data_vars",
-            "arch.info",
-            "function.variables",
-            "function.var_refs",
-            "value.flags_at",
-            "value.possible",
-            "workflow.describe",
-            "loader.load_settings_types",
-            "plugin.valid_commands",
-            "plugin_repo.status",
-            "type.parse_string",
-            "type.define_user",
-            "type_library.create",
-            "type_archive.create",
-            "project.create",
-            "project.create_folder",
-            "baseaddr.detect",
-            "database.create_bndb",
-            "database.write_global",
-            "task.search_text",
-            "task.analysis_update",
+            "health_ping",
+            "binja_info",
+            "session_open",
+            "analysis_update",
+            "analysis_progress",
+            "binary_summary",
+            "binary_functions",
+            "binary_strings",
+            "binary_sections",
+            "binary_segments",
+            "binary_symbols",
+            "binary_data_vars",
+            "arch_info",
+            "function_variables",
+            "function_var_refs",
+            "value_flags_at",
+            "value_possible",
+            "workflow_describe",
+            "loader_load_settings_types",
+            "plugin_valid_commands",
+            "plugin_repo_status",
+            "type_parse_string",
+            "type_define_user",
+            "type_library_create",
+            "type_archive_create",
+            "project_create",
+            "project_create_folder",
+            "baseaddr_detect",
+            "database_create_bndb",
+            "database_write_global",
+            "task_search_text",
+            "task_analysis_update",
         ]
 
         names = [
@@ -337,9 +337,9 @@ class McpFeatureFuzzer:
         return names + remaining
 
     def _seed_state(self, tools_by_name: dict[str, dict[str, Any]]) -> None:
-        if "session.open" in tools_by_name:
+        if "session_open" in tools_by_name:
             self._invoke(
-                "session.open",
+                "session_open",
                 {
                     "path": str(self._analysis_database or self._state.sample_path),
                     "read_only": False,
@@ -350,27 +350,27 @@ class McpFeatureFuzzer:
             )
 
         if (
-            "analysis.update_and_wait" in tools_by_name
+            "analysis_update_and_wait" in tools_by_name
             and self._state.active_session_id is not None
         ):
             self._invoke(
-                "analysis.update_and_wait",
+                "analysis_update_and_wait",
                 {"session_id": self._state.active_session_id},
             )
 
         seed_calls = [
-            "binary.summary",
-            "binary.functions",
-            "binary.strings",
-            "binary.sections",
-            "binary.segments",
-            "binary.symbols",
-            "binary.data_vars",
-            "arch.info",
-            "workflow.describe",
-            "loader.load_settings_types",
-            "plugin.valid_commands",
-            "plugin_repo.status",
+            "binary_summary",
+            "binary_functions",
+            "binary_strings",
+            "binary_sections",
+            "binary_segments",
+            "binary_symbols",
+            "binary_data_vars",
+            "arch_info",
+            "workflow_describe",
+            "loader_load_settings_types",
+            "plugin_valid_commands",
+            "plugin_repo_status",
         ]
         for name in seed_calls:
             if name not in tools_by_name:
@@ -378,18 +378,18 @@ class McpFeatureFuzzer:
             args = self._build_arguments(name, tools_by_name[name], fuzz=False)
             self._invoke(name, args)
 
-        if "type.parse_string" in tools_by_name and self._state.active_session_id is not None:
+        if "type_parse_string" in tools_by_name and self._state.active_session_id is not None:
             self._invoke(
-                "type.parse_string",
+                "type_parse_string",
                 {
                     "session_id": self._state.active_session_id,
                     "type_source": "int mcp_fuzz_type;",
                 },
             )
 
-        if "type.define_user" in tools_by_name and self._state.active_session_id is not None:
+        if "type_define_user" in tools_by_name and self._state.active_session_id is not None:
             self._invoke(
-                "type.define_user",
+                "type_define_user",
                 {
                     "session_id": self._state.active_session_id,
                     "type_source": "int mcp_fuzz_defined_type;",
@@ -398,10 +398,10 @@ class McpFeatureFuzzer:
             )
             self._state.type_names.add("mcp_fuzz_defined_type")
 
-        if "type_library.create" in tools_by_name and self._state.active_session_id is not None:
+        if "type_library_create" in tools_by_name and self._state.active_session_id is not None:
             lib_path = self._next_path("seed_type_library", ".bntl")
             self._invoke(
-                "type_library.create",
+                "type_library_create",
                 {
                     "session_id": self._state.active_session_id,
                     "name": self._next_name("seed_type_library"),
@@ -411,10 +411,10 @@ class McpFeatureFuzzer:
             )
             self._state.type_library_paths.add(str(lib_path))
 
-        if "type_archive.create" in tools_by_name and self._state.active_session_id is not None:
+        if "type_archive_create" in tools_by_name and self._state.active_session_id is not None:
             archive_path = self._next_path("seed_type_archive", ".bnta")
             self._invoke(
-                "type_archive.create",
+                "type_archive_create",
                 {
                     "session_id": self._state.active_session_id,
                     "path": str(archive_path),
@@ -423,10 +423,10 @@ class McpFeatureFuzzer:
             )
             self._state.type_archive_paths.add(str(archive_path))
 
-        if "project.create" in tools_by_name:
+        if "project_create" in tools_by_name:
             project_path = self._state.work_dir / self._next_name("seed_project")
             self._invoke(
-                "project.create",
+                "project_create",
                 {
                     "path": str(project_path),
                     "name": self._next_name("seed_project_name"),
@@ -434,15 +434,15 @@ class McpFeatureFuzzer:
             )
             self._state.project_paths.add(str(project_path))
 
-        if "task.search_text" in tools_by_name and self._state.active_session_id is not None:
+        if "task_search_text" in tools_by_name and self._state.active_session_id is not None:
             self._invoke(
-                "task.search_text",
+                "task_search_text",
                 {"session_id": self._state.active_session_id, "query": "main", "limit": 5},
             )
 
-        if "task.analysis_update" in tools_by_name and self._state.active_session_id is not None:
+        if "task_analysis_update" in tools_by_name and self._state.active_session_id is not None:
             self._invoke(
-                "task.analysis_update",
+                "task_analysis_update",
                 {"session_id": self._state.active_session_id},
             )
 
@@ -451,7 +451,7 @@ class McpFeatureFuzzer:
     def _deferred_cleanup(self) -> None:
         # Rebase a fresh original view: a .bndb view may legitimately refuse it.
         self._invoke(
-            "session.open",
+            "session_open",
             {
                 "path": str(self._state.sample_path),
                 "read_only": False,
@@ -460,7 +460,7 @@ class McpFeatureFuzzer:
         )
         if self._state.active_session_id is not None:
             self._invoke(
-                "loader.rebase",
+                "loader_rebase",
                 {
                     "session_id": self._state.active_session_id,
                     "address": self._pick_start_address(),
@@ -469,10 +469,10 @@ class McpFeatureFuzzer:
             )
 
         for project_id in sorted(self._state.project_ids):
-            self._invoke("project.close", {"project_id": project_id})
+            self._invoke("project_close", {"project_id": project_id})
 
         for session_id in sorted(self._state.session_ids):
-            self._invoke("session.close", {"session_id": session_id})
+            self._invoke("session_close", {"session_id": session_id})
 
     def _stabilize_known_tasks(self, *, max_rounds: int) -> None:
         # Retain the argument for callers of the old exploratory harness. A fixed
@@ -483,7 +483,7 @@ class McpFeatureFuzzer:
             pending = []
             for task_id in sorted(self._state.task_ids):
                 is_error, payload, _text = self._client.call_tool(
-                    "task.status", {"task_id": task_id}
+                    "task_status", {"task_id": task_id}
                 )
                 if is_error:
                     raise RuntimeError(f"cannot inspect task {task_id}: {payload}")
@@ -537,7 +537,7 @@ class McpFeatureFuzzer:
             error_text = payload.get("error") if isinstance(payload.get("error"), str) else text
             stats.last_error = error_text or "tool call returned isError=true"
             if (
-                tool_name == "debug.parse_and_apply"
+                tool_name == "debug_parse_and_apply"
                 and error_text == "no debug info parser is available for this view"
             ):
                 self._unavailable_calls.append({"tool": tool_name, "reason": error_text})
@@ -546,14 +546,14 @@ class McpFeatureFuzzer:
         stats.successes += 1
         self._successful_tools.add(tool_name)
         self._update_state(tool_name, arguments, payload)
-        if tool_name in {"analysis.update", "task.analysis_update"}:
+        if tool_name in {"analysis_update", "task_analysis_update"}:
             self._stabilize_known_tasks(max_rounds=0)
-        if tool_name == "analysis.abort":
+        if tool_name == "analysis_abort":
             # Restore analysis before testing IL and mutation tools on this view.
-            self._invoke("analysis.update_and_wait", {"session_id": arguments["session_id"]})
-        if tool_name == "analysis.set_hold" and arguments.get("hold"):
+            self._invoke("analysis_update_and_wait", {"session_id": arguments["session_id"]})
+        if tool_name == "analysis_set_hold" and arguments.get("hold"):
             self._client.call_tool(
-                "analysis.set_hold",
+                "analysis_set_hold",
                 {
                     "session_id": arguments["session_id"],
                     "hold": False,
@@ -563,24 +563,24 @@ class McpFeatureFuzzer:
     def _update_state(  # noqa: PLR0912, PLR0915
         self, tool_name: str, arguments: dict[str, Any], payload: dict[str, Any]
     ) -> None:
-        if tool_name == "session.open_bytes" and self._analysis_database is not None:
+        if tool_name == "session_open_bytes" and self._analysis_database is not None:
             # This unanalysed probe must not pollute the active view's address pool.
             self._state.session_ids.add(payload["session_id"])
-            self._invoke("session.close", {"session_id": payload["session_id"]})
+            self._invoke("session_close", {"session_id": payload["session_id"]})
             return
         self._collect_ids_and_addresses(payload)
 
-        if tool_name == "session.close":
+        if tool_name == "session_close":
             sid = arguments["session_id"]
             self._state.session_ids.discard(sid)
             if self._state.active_session_id == sid:
                 self._state.active_session_id = None
-        if tool_name in {"session.open", "session.open_bytes", "session.open_existing"}:
+        if tool_name in {"session_open", "session_open_bytes", "session_open_existing"}:
             previous = self._state.active_session_id
             self._state.session_ids.add(payload["session_id"])
             self._state.active_session_id = payload["session_id"]
             if previous and previous != payload["session_id"]:
-                self._invoke("session.close", {"session_id": previous})
+                self._invoke("session_close", {"session_id": previous})
             path_value = arguments.get("path", payload.get("filename", ""))
             if isinstance(path_value, str) and path_value.endswith(".bndb"):
                 self._state.database_session_ids.add(payload["session_id"])
@@ -595,10 +595,10 @@ class McpFeatureFuzzer:
                 values.clear()
             self._state.start_address = None
             self._state.end_address = None
-            for name in ("binary.summary", "binary.functions", "binary.symbols"):
+            for name in ("binary_summary", "binary_functions", "binary_symbols"):
                 self._invoke(name, {"session_id": payload["session_id"]})
 
-        if tool_name == "binary.summary":
+        if tool_name == "binary_summary":
             start = self._as_int(payload.get("start"))
             end = self._as_int(payload.get("end"))
             if start is not None:
@@ -608,7 +608,7 @@ class McpFeatureFuzzer:
                 self._state.end_address = end
                 self._state.addresses.add(end)
 
-        if tool_name == "binary.functions":
+        if tool_name == "binary_functions":
             for item in payload.get("items", []):
                 if not isinstance(item, dict):
                     continue
@@ -617,7 +617,7 @@ class McpFeatureFuzzer:
                     self._state.function_starts.add(start)
                     self._state.addresses.add(start)
 
-        if tool_name == "binary.symbols":
+        if tool_name == "binary_symbols":
             for item in payload.get("items", []):
                 if not isinstance(item, dict):
                     continue
@@ -626,7 +626,7 @@ class McpFeatureFuzzer:
                     self._state.symbol_addresses.add(address)
                     self._state.addresses.add(address)
 
-        if tool_name == "binary.data_vars":
+        if tool_name == "binary_data_vars":
             for item in payload.get("items", []):
                 if not isinstance(item, dict):
                     continue
@@ -634,7 +634,7 @@ class McpFeatureFuzzer:
                 if address is not None:
                     self._state.addresses.add(address)
 
-        if tool_name == "function.variables":
+        if tool_name == "function_variables":
             for item in payload.get("items", []):
                 if not isinstance(item, dict):
                     continue
@@ -642,17 +642,17 @@ class McpFeatureFuzzer:
                 if isinstance(name, str) and name:
                     self._state.variable_names.add(name)
 
-        if tool_name == "arch.info":
+        if tool_name == "arch_info":
             for register in payload.get("registers", []):
                 if isinstance(register, str) and register:
                     self._state.register_names.add(register)
 
-        if tool_name == "loader.load_settings_types":
+        if tool_name == "loader_load_settings_types":
             for type_name in payload.get("items", []):
                 if isinstance(type_name, str) and type_name:
                     self._state.load_setting_types.add(type_name)
 
-        if tool_name == "plugin.valid_commands":
+        if tool_name == "plugin_valid_commands":
             for item in payload.get("items", []):
                 if not isinstance(item, dict):
                     continue
@@ -660,7 +660,7 @@ class McpFeatureFuzzer:
                 if isinstance(name, str) and name:
                     self._state.plugin_command_names.add(name)
 
-        if tool_name == "workflow.describe":
+        if tool_name == "workflow_describe":
             workflow_name = payload.get("name")
             if isinstance(workflow_name, str) and workflow_name:
                 self._state.workflow_names.add(workflow_name)
@@ -671,22 +671,22 @@ class McpFeatureFuzzer:
                         if isinstance(value, str) and value:
                             self._state.workflow_activities.add(value)
 
-        if tool_name == "workflow.clone":
+        if tool_name == "workflow_clone":
             workflow_name = payload.get("workflow")
             if isinstance(workflow_name, str) and workflow_name:
                 self._state.workflow_names.add(workflow_name)
 
-        if tool_name == "type.parse_string":
+        if tool_name == "type_parse_string":
             parsed_name = payload.get("parsed_name")
             if isinstance(parsed_name, str) and parsed_name:
                 self._state.type_names.add(parsed_name)
 
-        if tool_name in {"type.define_user", "type.rename", "type.export_to_library"}:
+        if tool_name in {"type_define_user", "type_rename", "type_export_to_library"}:
             name = payload.get("name")
             if isinstance(name, str) and name:
                 self._state.type_names.add(name)
 
-        if tool_name == "project.create":
+        if tool_name == "project_create":
             project = payload.get("project")
             if isinstance(project, dict):
                 project_path = project.get("path")
@@ -696,29 +696,29 @@ class McpFeatureFuzzer:
                 if isinstance(project_id, str) and project_id:
                     self._state.active_project_id = project_id
 
-        if tool_name == "project.create_folder":
+        if tool_name == "project_create_folder":
             folder = payload.get("folder")
             if isinstance(folder, dict):
                 folder_id = folder.get("id")
                 if isinstance(folder_id, str) and folder_id:
                     self._state.folder_ids.add(folder_id)
 
-        if tool_name == "type_library.create":
+        if tool_name == "type_library_create":
             path = arguments.get("path")
             if isinstance(path, str) and path:
                 self._state.type_library_paths.add(path)
 
-        if tool_name == "type_archive.create":
+        if tool_name == "type_archive_create":
             path = arguments.get("path")
             if isinstance(path, str) and path:
                 self._state.type_archive_paths.add(path)
 
-        if tool_name == "database.create_bndb":
+        if tool_name == "database_create_bndb":
             path = arguments.get("path")
             if isinstance(path, str) and path:
                 self._state.bndb_paths.add(path)
 
-        if tool_name == "plugin_repo.status":
+        if tool_name == "plugin_repo_status":
             repositories = payload.get("repositories", [])
             if isinstance(repositories, list):
                 for repository in repositories:
@@ -788,7 +788,7 @@ class McpFeatureFuzzer:
     def _build_arguments(  # noqa: PLR0912,PLR0915
         self, tool_name: str, tool_def: dict[str, Any], *, fuzz: bool
     ) -> dict[str, Any]:
-        if tool_name == "plugin_repo.plugin_action":
+        if tool_name == "plugin_repo_plugin_action":
             special = self._build_plugin_repo_action_arguments()
             if special is not None:
                 return special
@@ -826,27 +826,27 @@ class McpFeatureFuzzer:
                 continue
             arguments[key] = value
 
-        if tool_name in {"session.open", "session.open_bytes", "session.open_existing"}:
+        if tool_name in {"session_open", "session_open_bytes", "session_open_existing"}:
             arguments.setdefault("read_only", False)
             arguments.setdefault("deterministic", True)
             arguments.setdefault("update_analysis", self._update_analysis)
             if self._load_options:
                 arguments["options"] = self._load_options
-            if tool_name == "session.open_bytes" and self._analysis_database is not None:
+            if tool_name == "session_open_bytes" and self._analysis_database is not None:
                 arguments["update_analysis"] = False
 
-        if tool_name == "session.set_mode":
+        if tool_name == "session_set_mode":
             arguments.setdefault("read_only", False)
 
-        if tool_name == "plugin.execute":
+        if tool_name == "plugin_execute":
             arguments.setdefault("perform", False)
-        if tool_name == "external.location_add":
+        if tool_name == "external_location_add":
             arguments.setdefault("target_symbol", "mcp_fuzz_external")
-        if tool_name == "annotation.define_data_var":
+        if tool_name == "annotation_define_data_var":
             arguments["type_name"] = "char"
-        if tool_name in {"annotation.rename_data_var", "data.typed_at"}:
+        if tool_name in {"annotation_rename_data_var", "data_typed_at"}:
             error, variables, _ = self._client.call_tool(
-                "binary.data_vars",
+                "binary_data_vars",
                 {
                     "session_id": self._pick_session_id(),
                     "limit": 1,
@@ -854,9 +854,9 @@ class McpFeatureFuzzer:
             )
             if not error and variables.get("items"):
                 arguments["address"] = variables["items"][0]["address"]
-        if tool_name in {"annotation.rename_symbol", "annotation.undefine_symbol"}:
+        if tool_name in {"annotation_rename_symbol", "annotation_undefine_symbol"}:
             arguments["address"] = self._pick_address(prefer_symbol=True)
-        if tool_name == "baseaddr.detect":
+        if tool_name == "baseaddr_detect":
             # Bound this unrelated native heuristic during broad catalog coverage.
             # Lifecycle fuzzing separately runs the normal full analysis pipeline.
             base = self._pick_start_address()
@@ -870,63 +870,63 @@ class McpFeatureFuzzer:
         if tool_name.startswith("workflow.machine."):
             # A cloned definition has no machine; control the session's bound workflow.
             arguments.pop("workflow_name", None)
-        if tool_name in {"type_archive.push", "type_archive.pull", "type_archive.references"}:
+        if tool_name in {"type_archive_push", "type_archive_pull", "type_archive_references"}:
             # A fresh archive is empty, and earlier rename/undefine calls can make
             # cached names stale. Establish an actual type and archive entry.
             archive_type = "mcp_fuzz_archive_type"
             session_id = self._pick_session_id()
             self._invoke(
-                "type.define_user",
+                "type_define_user",
                 {"session_id": session_id, "name": archive_type, "type_source": "int"},
             )
-            if tool_name == "type_archive.references":
+            if tool_name == "type_archive_references":
                 arguments["name"] = archive_type
             else:
                 arguments["names"] = [archive_type]
-            if tool_name != "type_archive.push":
+            if tool_name != "type_archive_push":
                 self._invoke(
-                    "type_archive.push",
+                    "type_archive_push",
                     {
                         "session_id": session_id,
                         "type_archive_id": arguments["type_archive_id"],
                         "names": [archive_type],
                     },
                 )
-        if tool_name == "transform.inspect":
+        if tool_name == "transform_inspect":
             arguments.setdefault("session_id", self._pick_session_id())
-        if tool_name.startswith("value.") and "function_start" in arguments:
+        if tool_name.startswith("value_") and "function_start" in arguments:
             arguments["address"] = arguments["function_start"]
-        addressed_il = tool_name == "binary.get_function_il_at"
+        addressed_il = tool_name == "binary_get_function_il_at"
         needs_il = addressed_il or (
             "function_start" in arguments
             and (
-                tool_name.startswith(("il.", "function.ssa_"))
+                tool_name.startswith(("il_", "function_ssa_"))
                 or tool_name
                 in {
-                    "value.flags_at",
-                    "value.possible",
-                    "uidf.set_user_var_value",
-                    "uidf.clear_user_var_value",
+                    "value_flags_at",
+                    "value_possible",
+                    "uidf_set_user_var_value",
+                    "uidf_clear_user_var_value",
                 }
             )
         )
         if needs_il:
             # Earlier mutation tools can invalidate IL and schedule native updates.
             # Establish the prerequisite before choosing a function to query/rewrite.
-            self._invoke("analysis.update_and_wait", {"session_id": self._pick_session_id()})
+            self._invoke("analysis_update_and_wait", {"session_id": self._pick_session_id()})
             for start in sorted(self._state.function_starts):
                 query = {
                     "session_id": self._pick_session_id(),
                     "address" if addressed_il else "function_start": start,
                     "level": "llil"
-                    if tool_name == "value.flags_at"
+                    if tool_name == "value_flags_at"
                     else arguments.get("level", "mlil"),
-                    "ssa": arguments.get("ssa", False) or tool_name.startswith("function.ssa_"),
+                    "ssa": arguments.get("ssa", False) or tool_name.startswith("function_ssa_"),
                 }
                 if not addressed_il:
                     query["limit"] = 1
                 error, il, _ = self._client.call_tool(
-                    "binary.get_function_il_at" if addressed_il else "il.function", query
+                    "binary_get_function_il_at" if addressed_il else "il_function", query
                 )
                 if not error and il.get("items"):
                     if "function_start" in arguments:
@@ -936,9 +936,9 @@ class McpFeatureFuzzer:
                     break
         if "variable_name" in arguments and "function_start" in arguments:
             for start in sorted(self._state.function_starts):
-                if tool_name == "function.ssa_var_def_use":
+                if tool_name == "function_ssa_var_def_use":
                     error, il, _ = self._client.call_tool(
-                        "il.function",
+                        "il_function",
                         {
                             "session_id": self._pick_session_id(),
                             "function_start": start,
@@ -950,14 +950,14 @@ class McpFeatureFuzzer:
                     if error or not il.get("items"):
                         continue
                 error, variables, _ = self._client.call_tool(
-                    "function.variables",
+                    "function_variables",
                     {
                         "session_id": self._pick_session_id(),
                         "function_start": start,
                     },
                 )
                 candidates = variables.get("items", []) if not error else []
-                if tool_name in {"uidf.set_user_var_value", "uidf.clear_user_var_value"}:
+                if tool_name in {"uidf_set_user_var_value", "uidf_clear_user_var_value"}:
                     # Native API defines parameters (index 0) at the function entry.
                     # Other variables require an actual MLIL definition-site address.
                     candidates = [var for var in candidates if var.get("index") == 0]
@@ -967,13 +967,13 @@ class McpFeatureFuzzer:
                         arguments["def_addr"] = start
                     arguments["variable_name"] = candidates[0]["name"]
                     break
-        if tool_name == "uidf.clear_user_var_value":
+        if tool_name == "uidf_clear_user_var_value":
             # Clear an actual value we set at the same definition site.
             self._invoke(
-                "uidf.set_user_var_value", {**arguments, "value": "0x2a", "state": "ConstantValue"}
+                "uidf_set_user_var_value", {**arguments, "value": "0x2a", "state": "ConstantValue"}
             )
 
-        if tool_name == "disasm.function":
+        if tool_name == "disasm_function":
             has_function_start = "function_start" in arguments
             has_address = "address" in arguments
             if not has_function_start and not has_address:
@@ -1043,10 +1043,10 @@ class McpFeatureFuzzer:
             return self._pick_function_start()
 
         if key == "address" and tool_name in {
-            "binary.get_function_at",
-            "binary.get_function_disassembly_at",
-            "binary.get_function_il_at",
-            "disasm.function",
+            "binary_get_function_at",
+            "binary_get_function_disassembly_at",
+            "binary_get_function_il_at",
+            "disasm_function",
         }:
             return self._pick_function_start()
 
@@ -1146,7 +1146,7 @@ class McpFeatureFuzzer:
         if key == "constant":
             return 1
 
-        if key == "action" and tool_name == "workflow.machine.control":
+        if key == "action" and tool_name == "workflow_machine_control":
             return "enable"
 
         if key == "activities":
@@ -1163,7 +1163,7 @@ class McpFeatureFuzzer:
             return [self._pick_one(self._state.type_names, "mcp_fuzz_type")]
 
         if key == "options":
-            if tool_name == "type.parse_declarations":
+            if tool_name == "type_parse_declarations":
                 return []
             return {}
 
@@ -1177,7 +1177,7 @@ class McpFeatureFuzzer:
             return []
 
         if key == "data_base64":
-            if tool_name == "session.open_bytes":
+            if tool_name == "session_open_bytes":
                 return self._state.sample_data_b64
             return base64.b64encode(b"fuzz-data").decode("ascii")
 
@@ -1220,14 +1220,14 @@ class McpFeatureFuzzer:
         return _MISSING
 
     def _value_for_value_field(self, tool_name: str, schema: Any) -> Any:
-        if tool_name in {"uidf.parse_possible_value", "uidf.set_user_var_value"}:
+        if tool_name in {"uidf_parse_possible_value", "uidf_set_user_var_value"}:
             return "0x2a"
         types = self._schema_types(schema)
         if "integer" in types:
             return 42
         if "string" in types:
             return "fuzz-value"
-        if tool_name in {"project.metadata_store", "metadata.store", "function.metadata_store"}:
+        if tool_name in {"project_metadata_store", "metadata_store", "function_metadata_store"}:
             return {"fuzz": True, "n": 1}
         return "fuzz-value"
 
@@ -1295,13 +1295,13 @@ class McpFeatureFuzzer:
         return max(default, minimum)
 
     def _length_for_tool(self, tool_name: str, schema: Any) -> int:
-        if tool_name == "memory.read":
+        if tool_name == "memory_read":
             return 32
-        if tool_name == "disasm.range":
+        if tool_name == "disasm_range":
             return 64
-        if tool_name == "memory.remove":
+        if tool_name == "memory_remove":
             return 1
-        if tool_name.startswith("xref."):
+        if tool_name.startswith("xref_"):
             return 1
         return self._pick_integer(schema, default=16)
 
@@ -1383,81 +1383,81 @@ class McpFeatureFuzzer:
         return value
 
     def _name_for_tool(self, tool_name: str) -> str:  # noqa: PLR0911
-        if tool_name == "plugin.execute":
+        if tool_name == "plugin_execute":
             value = self._pick_one(self._state.plugin_command_names, "")
             if isinstance(value, str) and value:
                 return value
             return self._next_name("plugin")
 
-        if tool_name == "external.library_remove":
+        if tool_name == "external_library_remove":
             value = self._pick_one(self._state.external_library_names, "mcp_ext_lib")
             assert isinstance(value, str)
             return value
 
-        if tool_name == "external.library_add":
+        if tool_name == "external_library_add":
             name = self._next_name("mcp_ext_lib")
             self._state.external_library_names.add(name)
             return name
 
-        if tool_name == "type.undefine_user":
+        if tool_name == "type_undefine_user":
             value = self._pick_one(self._state.type_names, "mcp_fuzz_type")
             assert isinstance(value, str)
             return value
 
-        if tool_name in {"type.import_library_type", "type.import_library_object"}:
+        if tool_name in {"type_import_library_type", "type_import_library_object"}:
             value = self._pick_one(self._state.type_names, "mcp_fuzz_type")
             assert isinstance(value, str)
             return value
 
-        if tool_name == "workflow.clone":
+        if tool_name == "workflow_clone":
             name = self._next_name("workflow")
             self._state.workflow_names.add(name)
             return name
 
-        if tool_name == "project.create":
+        if tool_name == "project_create":
             return self._next_name("project")
 
-        if tool_name == "project.create_folder":
+        if tool_name == "project_create_folder":
             return self._next_name("folder")
 
-        if tool_name == "project.create_file":
+        if tool_name == "project_create_file":
             return f"{self._next_name('file')}.bin"
 
         return self._next_name("name")
 
     def _path_for_tool(self, tool_name: str) -> str:  # noqa: PLR0911, PLR0912
-        if tool_name == "session.open":
+        if tool_name == "session_open":
             return str(self._analysis_database or self._state.sample_path)
 
-        if tool_name == "session.open_bytes":
+        if tool_name == "session_open_bytes":
             return str(self._state.sample_path)
 
-        if tool_name == "database.create_bndb":
+        if tool_name == "database_create_bndb":
             path = self._next_path("fuzz_db", ".bndb")
             self._state.bndb_paths.add(str(path))
             return str(path)
 
-        if tool_name == "binary.save":
+        if tool_name == "binary_save":
             return str(self._next_path("fuzz_binary", ".bin"))
 
-        if tool_name == "project.create":
+        if tool_name == "project_create":
             path = self._state.work_dir / self._next_name("project_dir")
             self._state.project_paths.add(str(path))
             return str(path)
 
-        if tool_name == "project.open":
+        if tool_name == "project_open":
             if self._state.project_paths:
                 value = self._pick_one(self._state.project_paths, str(self._state.work_dir))
                 assert isinstance(value, str)
                 return value
             return str(self._state.work_dir)
 
-        if tool_name == "type_library.create":
+        if tool_name == "type_library_create":
             path = self._next_path("fuzz_type_library", ".bntl")
             self._state.type_library_paths.add(str(path))
             return str(path)
 
-        if tool_name == "type_library.load":
+        if tool_name == "type_library_load":
             if self._state.type_library_paths:
                 value = self._pick_one(self._state.type_library_paths, "")
                 assert isinstance(value, str)
@@ -1465,12 +1465,12 @@ class McpFeatureFuzzer:
             path = self._next_path("fuzz_type_library", ".bntl")
             return str(path)
 
-        if tool_name == "type_archive.create":
+        if tool_name == "type_archive_create":
             path = self._next_path("fuzz_type_archive", ".bnta")
             self._state.type_archive_paths.add(str(path))
             return str(path)
 
-        if tool_name == "type_archive.open":
+        if tool_name == "type_archive_open":
             if self._state.type_archive_paths:
                 value = self._pick_one(self._state.type_archive_paths, "")
                 assert isinstance(value, str)
@@ -1478,10 +1478,10 @@ class McpFeatureFuzzer:
             path = self._next_path("fuzz_type_archive", ".bnta")
             return str(path)
 
-        if tool_name == "transform.inspect":
+        if tool_name == "transform_inspect":
             return str(self._state.sample_path)
 
-        if tool_name == "debug.parse_and_apply":
+        if tool_name == "debug_parse_and_apply":
             return str(self._state.sample_path)
 
         return str(self._state.sample_path)
@@ -1597,7 +1597,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--update-analysis",
         action="store_true",
-        help="Pass update_analysis=true on session.open",
+        help="Pass update_analysis=true on session_open",
     )
     parser.add_argument(
         "--analysis-database",

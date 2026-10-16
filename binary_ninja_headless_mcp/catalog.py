@@ -34,15 +34,15 @@ def _tool(
 
 def _definitions() -> list[dict[str, Any]]:
     return [
-        _tool("health.ping", "Health check."),
+        _tool("health_ping", "Health check."),
         _tool(
-            "mcp.response_format",
+            "mcp_response_format",
             "Explain MCP tool result fields (`structuredContent` full payload, "
             "`content[0].text` summary).",
         ),
-        _tool("binja.info", "Return Binary Ninja version/install info."),
+        _tool("binja_info", "Return Binary Ninja version/install info."),
         _tool(
-            "binja.call",
+            "binja_call",
             "Generic API bridge: call `bn.*` or `bv.*` target path.",
             {
                 "target": {"type": "string"},
@@ -53,7 +53,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["target"],
         ),
         _tool(
-            "binja.eval",
+            "binja_eval",
             "Evaluate Python code with `bn`, `sessions`, and optional `bv`.",
             {
                 "code": {"type": "string"},
@@ -62,7 +62,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["code"],
         ),
         _tool(
-            "session.open",
+            "session_open",
             "Open a binary and create a session.",
             {
                 "path": {"type": "string"},
@@ -74,7 +74,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["path"],
         ),
         _tool(
-            "session.open_bytes",
+            "session_open_bytes",
             "Open a binary session from base64-encoded bytes.",
             {
                 "data_base64": {"type": "string"},
@@ -87,7 +87,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["data_base64"],
         ),
         _tool(
-            "session.open_existing",
+            "session_open_existing",
             "Open another session from an existing session's file.",
             {
                 "source_session_id": {"type": "string"},
@@ -99,20 +99,20 @@ def _definitions() -> list[dict[str, Any]]:
             ["source_session_id"],
         ),
         _tool(
-            "session.close",
+            "session_close",
             "Close one open session.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
-        _tool("session.list", "List open sessions."),
+        _tool("session_list", "List open sessions."),
         _tool(
-            "session.mode",
+            "session_mode",
             "Get session safety/determinism mode.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "session.set_mode",
+            "session_set_mode",
             "Update session safety/determinism mode.",
             {
                 "session_id": {"type": "string"},
@@ -122,37 +122,37 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "analysis.status",
+            "analysis_status",
             "Get lifecycle status, timestamps, task and error, plus native state/progress.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "analysis.progress",
+            "analysis_progress",
             "Get analysis progress snapshot.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "analysis.update",
+            "analysis_update",
             "Start tracked analysis and return task_id; reject overlap on this session.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "analysis.update_and_wait",
+            "analysis_update_and_wait",
             "Wait synchronously until analysis finishes; no timed partial-success response.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "analysis.abort",
+            "analysis_abort",
             "Abort analysis.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "analysis.set_hold",
+            "analysis_set_hold",
             "Hold/release analysis queue.",
             {
                 "session_id": {"type": "string"},
@@ -161,13 +161,13 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "hold"],
         ),
         _tool(
-            "binary.summary",
+            "binary_summary",
             "Get binary/session summary.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "binary.save",
+            "binary_save",
             "Save the current binary view to a file path.",
             {
                 "session_id": {"type": "string"},
@@ -176,7 +176,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "path"],
         ),
         _tool(
-            "binary.functions",
+            "binary_functions",
             "List functions with pagination.",
             {
                 "session_id": {"type": "string"},
@@ -186,7 +186,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "binary.strings",
+            "binary_strings",
             "List discovered strings with pagination.",
             {
                 "session_id": {"type": "string"},
@@ -196,7 +196,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "binary.search_text",
+            "binary_search_text",
             "Search raw text/bytes in a session.",
             {
                 "session_id": {"type": "string"},
@@ -206,7 +206,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "query"],
         ),
         _tool(
-            "binary.sections",
+            "binary_sections",
             "List sections with pagination.",
             {
                 "session_id": {"type": "string"},
@@ -216,7 +216,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "binary.segments",
+            "binary_segments",
             "List segments with pagination.",
             {
                 "session_id": {"type": "string"},
@@ -226,7 +226,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "binary.symbols",
+            "binary_symbols",
             "List symbols with pagination.",
             {
                 "session_id": {"type": "string"},
@@ -236,7 +236,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "binary.data_vars",
+            "binary_data_vars",
             "List data variables with pagination.",
             {
                 "session_id": {"type": "string"},
@@ -246,7 +246,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "binary.get_function_at",
+            "binary_get_function_at",
             "Find function by address.",
             {
                 "session_id": {"type": "string"},
@@ -257,7 +257,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "binary.get_function_disassembly_at",
+            "binary_get_function_disassembly_at",
             "Get full disassembly for the function containing an address.",
             {
                 "session_id": {"type": "string"},
@@ -268,7 +268,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "binary.get_function_il_at",
+            "binary_get_function_il_at",
             "Get full IL for the function containing an address.",
             {
                 "session_id": {"type": "string"},
@@ -281,7 +281,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "binary.functions_at",
+            "binary_functions_at",
             "List functions at an address.",
             {
                 "session_id": {"type": "string"},
@@ -292,7 +292,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "binary.basic_blocks_at",
+            "binary_basic_blocks_at",
             "List basic blocks at an address with pagination.",
             {
                 "session_id": {"type": "string"},
@@ -305,7 +305,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "function.basic_blocks",
+            "function_basic_blocks",
             "List basic blocks in a function with pagination.",
             {
                 "session_id": {"type": "string"},
@@ -318,7 +318,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start"],
         ),
         _tool(
-            "disasm.linear",
+            "disasm_linear",
             "Get linear disassembly lines.",
             {
                 "session_id": {"type": "string"},
@@ -328,7 +328,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "search.data",
+            "search_data",
             "Search for raw byte patterns (hex string).",
             {
                 "session_id": {"type": "string"},
@@ -340,7 +340,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "data_hex"],
         ),
         _tool(
-            "search.next_text",
+            "search_next_text",
             "Find next text match.",
             {
                 "session_id": {"type": "string"},
@@ -350,7 +350,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "start", "query"],
         ),
         _tool(
-            "search.all_text",
+            "search_all_text",
             "Find all text matches in range (regex optional).",
             {
                 "session_id": {"type": "string"},
@@ -363,7 +363,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "start", "end", "query"],
         ),
         _tool(
-            "search.next_data",
+            "search_next_data",
             "Find next data/byte-pattern match.",
             {
                 "session_id": {"type": "string"},
@@ -373,7 +373,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "start", "data_hex"],
         ),
         _tool(
-            "search.all_data",
+            "search_all_data",
             "Find all data/byte-pattern matches in range.",
             {
                 "session_id": {"type": "string"},
@@ -385,7 +385,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "start", "end", "data_hex"],
         ),
         _tool(
-            "search.next_constant",
+            "search_next_constant",
             "Find next constant occurrence.",
             {
                 "session_id": {"type": "string"},
@@ -395,7 +395,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "start", "constant"],
         ),
         _tool(
-            "search.all_constant",
+            "search_all_constant",
             "Find all constant occurrences in range.",
             {
                 "session_id": {"type": "string"},
@@ -407,7 +407,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "start", "end", "constant"],
         ),
         _tool(
-            "xref.code_refs_to",
+            "xref_code_refs_to",
             "Code references to an address.",
             {
                 "session_id": {"type": "string"},
@@ -420,7 +420,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "xref.code_refs_from",
+            "xref_code_refs_from",
             "Code references from an address.",
             {
                 "session_id": {"type": "string"},
@@ -432,7 +432,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "xref.data_refs_to",
+            "xref_data_refs_to",
             "Data references to an address.",
             {
                 "session_id": {"type": "string"},
@@ -444,7 +444,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "xref.data_refs_from",
+            "xref_data_refs_from",
             "Data references from an address.",
             {
                 "session_id": {"type": "string"},
@@ -456,7 +456,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "function.callers",
+            "function_callers",
             "Callers of a function.",
             {
                 "session_id": {"type": "string"},
@@ -467,7 +467,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start"],
         ),
         _tool(
-            "function.callees",
+            "function_callees",
             "Callees of a function.",
             {
                 "session_id": {"type": "string"},
@@ -478,7 +478,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start"],
         ),
         _tool(
-            "function.variables",
+            "function_variables",
             "List function variables.",
             {
                 "session_id": {"type": "string"},
@@ -489,7 +489,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start"],
         ),
         _tool(
-            "function.var_refs",
+            "function_var_refs",
             "List variable references in MLIL/HLIL.",
             {
                 "session_id": {"type": "string"},
@@ -502,7 +502,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "variable_name"],
         ),
         _tool(
-            "function.var_refs_from",
+            "function_var_refs_from",
             "List variable references originating from an address.",
             {
                 "session_id": {"type": "string"},
@@ -516,7 +516,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "address"],
         ),
         _tool(
-            "function.ssa_var_def_use",
+            "function_ssa_var_def_use",
             "Get SSA variable definition and uses.",
             {
                 "session_id": {"type": "string"},
@@ -530,7 +530,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "variable_name", "version"],
         ),
         _tool(
-            "function.ssa_memory_def_use",
+            "function_ssa_memory_def_use",
             "Get SSA memory definition and uses by memory version.",
             {
                 "session_id": {"type": "string"},
@@ -543,7 +543,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "version"],
         ),
         _tool(
-            "value.reg",
+            "value_reg",
             "Get register value at/after an address.",
             {
                 "session_id": {"type": "string"},
@@ -557,7 +557,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "address", "register"],
         ),
         _tool(
-            "value.stack",
+            "value_stack",
             "Get stack contents at/after an address.",
             {
                 "session_id": {"type": "string"},
@@ -572,7 +572,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "address", "stack_offset", "size"],
         ),
         _tool(
-            "value.possible",
+            "value_possible",
             "Get IL possible value set at an address.",
             {
                 "session_id": {"type": "string"},
@@ -586,7 +586,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "address"],
         ),
         _tool(
-            "value.flags_at",
+            "value_flags_at",
             "Get lifted IL flag read/write state at an address.",
             {
                 "session_id": {"type": "string"},
@@ -598,7 +598,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "address"],
         ),
         _tool(
-            "memory.read",
+            "memory_read",
             "Read bytes from the view.",
             {
                 "session_id": {"type": "string"},
@@ -608,7 +608,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "length"],
         ),
         _tool(
-            "memory.write",
+            "memory_write",
             "Write bytes (hex) to the view.",
             {
                 "session_id": {"type": "string"},
@@ -618,7 +618,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "data_hex"],
         ),
         _tool(
-            "memory.insert",
+            "memory_insert",
             "Insert bytes (hex) into the view.",
             {
                 "session_id": {"type": "string"},
@@ -628,7 +628,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "data_hex"],
         ),
         _tool(
-            "memory.remove",
+            "memory_remove",
             "Remove bytes from the view.",
             {
                 "session_id": {"type": "string"},
@@ -638,7 +638,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "length"],
         ),
         _tool(
-            "memory.reader_read",
+            "memory_reader_read",
             "Read integer values via BinaryReader.",
             {
                 "session_id": {"type": "string"},
@@ -649,7 +649,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "width"],
         ),
         _tool(
-            "memory.writer_write",
+            "memory_writer_write",
             "Write integer values via BinaryWriter.",
             {
                 "session_id": {"type": "string"},
@@ -661,7 +661,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "width", "value"],
         ),
         _tool(
-            "data.typed_at",
+            "data_typed_at",
             "Get typed data variable at an address.",
             {
                 "session_id": {"type": "string"},
@@ -670,7 +670,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "disasm.function",
+            "disasm_function",
             "Get full disassembly for the function containing an address.",
             {
                 "session_id": {"type": "string"},
@@ -681,7 +681,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "disasm.range",
+            "disasm_range",
             "Address-range disassembly lines.",
             {
                 "session_id": {"type": "string"},
@@ -694,7 +694,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "start", "length"],
         ),
         _tool(
-            "il.function",
+            "il_function",
             "IL function listing.",
             {
                 "session_id": {"type": "string"},
@@ -709,7 +709,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start"],
         ),
         _tool(
-            "il.instruction_by_addr",
+            "il_instruction_by_addr",
             "Get IL instruction by source address.",
             {
                 "session_id": {"type": "string"},
@@ -725,7 +725,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "address"],
         ),
         _tool(
-            "il.address_to_index",
+            "il_address_to_index",
             "Map address to IL index/indices.",
             {
                 "session_id": {"type": "string"},
@@ -741,7 +741,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "address"],
         ),
         _tool(
-            "il.index_to_address",
+            "il_index_to_address",
             "Map IL index to source address.",
             {
                 "session_id": {"type": "string"},
@@ -755,7 +755,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "index"],
         ),
         _tool(
-            "annotation.rename_function",
+            "annotation_rename_function",
             "Rename a function.",
             {
                 "session_id": {"type": "string"},
@@ -765,7 +765,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "new_name"],
         ),
         _tool(
-            "annotation.rename_symbol",
+            "annotation_rename_symbol",
             "Rename symbol at address.",
             {
                 "session_id": {"type": "string"},
@@ -775,7 +775,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "new_name"],
         ),
         _tool(
-            "annotation.undefine_symbol",
+            "annotation_undefine_symbol",
             "Undefine user symbol at address.",
             {
                 "session_id": {"type": "string"},
@@ -784,7 +784,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "annotation.define_symbol",
+            "annotation_define_symbol",
             "Define symbol at address.",
             {
                 "session_id": {"type": "string"},
@@ -795,7 +795,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "name"],
         ),
         _tool(
-            "annotation.rename_data_var",
+            "annotation_rename_data_var",
             "Rename data variable.",
             {
                 "session_id": {"type": "string"},
@@ -805,7 +805,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "new_name"],
         ),
         _tool(
-            "annotation.define_data_var",
+            "annotation_define_data_var",
             "Define data variable.",
             {
                 "session_id": {"type": "string"},
@@ -817,7 +817,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "annotation.undefine_data_var",
+            "annotation_undefine_data_var",
             "Undefine data variable.",
             {
                 "session_id": {"type": "string"},
@@ -826,7 +826,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "annotation.set_comment",
+            "annotation_set_comment",
             "Set comment at address.",
             {
                 "session_id": {"type": "string"},
@@ -836,7 +836,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "comment"],
         ),
         _tool(
-            "annotation.get_comment",
+            "annotation_get_comment",
             "Get comment at address.",
             {
                 "session_id": {"type": "string"},
@@ -845,7 +845,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "annotation.add_tag",
+            "annotation_add_tag",
             "Add user data tag at address.",
             {
                 "session_id": {"type": "string"},
@@ -857,7 +857,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "tag_type", "data"],
         ),
         _tool(
-            "annotation.get_tags",
+            "annotation_get_tags",
             "Get tags at address.",
             {
                 "session_id": {"type": "string"},
@@ -866,7 +866,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "metadata.store",
+            "metadata_store",
             "Store metadata by key.",
             {
                 "session_id": {"type": "string"},
@@ -876,7 +876,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "key", "value"],
         ),
         _tool(
-            "metadata.query",
+            "metadata_query",
             "Query metadata by key.",
             {
                 "session_id": {"type": "string"},
@@ -885,7 +885,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "key"],
         ),
         _tool(
-            "metadata.remove",
+            "metadata_remove",
             "Remove metadata by key.",
             {
                 "session_id": {"type": "string"},
@@ -894,7 +894,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "key"],
         ),
         _tool(
-            "function.metadata_store",
+            "function_metadata_store",
             "Store function metadata by key.",
             {
                 "session_id": {"type": "string"},
@@ -907,7 +907,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "key", "value"],
         ),
         _tool(
-            "function.metadata_query",
+            "function_metadata_query",
             "Query function metadata by key.",
             {
                 "session_id": {"type": "string"},
@@ -919,7 +919,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "key"],
         ),
         _tool(
-            "function.metadata_remove",
+            "function_metadata_remove",
             "Remove function metadata by key.",
             {
                 "session_id": {"type": "string"},
@@ -931,7 +931,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "key"],
         ),
         _tool(
-            "patch.assemble",
+            "patch_assemble",
             "Assemble and patch instruction bytes at address.",
             {
                 "session_id": {"type": "string"},
@@ -941,7 +941,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "asm"],
         ),
         _tool(
-            "patch.status",
+            "patch_status",
             "Inspect patch availability at address.",
             {
                 "session_id": {"type": "string"},
@@ -950,7 +950,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "patch.convert_to_nop",
+            "patch_convert_to_nop",
             "Patch instruction to NOP when supported.",
             {
                 "session_id": {"type": "string"},
@@ -959,7 +959,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "patch.always_branch",
+            "patch_always_branch",
             "Patch conditional branch to always branch when supported.",
             {
                 "session_id": {"type": "string"},
@@ -968,7 +968,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "patch.never_branch",
+            "patch_never_branch",
             "Patch conditional branch to never branch when supported.",
             {
                 "session_id": {"type": "string"},
@@ -977,7 +977,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "patch.invert_branch",
+            "patch_invert_branch",
             "Patch conditional branch by inversion when supported.",
             {
                 "session_id": {"type": "string"},
@@ -986,7 +986,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "patch.skip_and_return_value",
+            "patch_skip_and_return_value",
             "Patch instruction to skip and return value when supported.",
             {
                 "session_id": {"type": "string"},
@@ -996,13 +996,13 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address", "value"],
         ),
         _tool(
-            "undo.begin",
+            "undo_begin",
             "Begin undo transaction.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "undo.commit",
+            "undo_commit",
             "Commit undo transaction.",
             {
                 "session_id": {"type": "string"},
@@ -1011,7 +1011,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "undo.revert",
+            "undo_revert",
             "Revert undo transaction.",
             {
                 "session_id": {"type": "string"},
@@ -1020,25 +1020,25 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "undo.undo",
+            "undo_undo",
             "Perform undo.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "undo.redo",
+            "undo_redo",
             "Perform redo.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "task.analysis_update",
-            "Alias of analysis.update: start tracked analysis and return task_id.",
+            "task_analysis_update",
+            "Alias of analysis_update: start tracked analysis and return task_id.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "task.search_text",
+            "task_search_text",
             "Start async search task.",
             {
                 "session_id": {"type": "string"},
@@ -1048,25 +1048,25 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "query"],
         ),
         _tool(
-            "task.status",
+            "task_status",
             "Get task status.",
             {"task_id": {"type": "string"}},
             ["task_id"],
         ),
         _tool(
-            "task.result",
+            "task_result",
             "Get terminal result (completed/failed/cancelled); pending tasks return an error.",
             {"task_id": {"type": "string"}},
             ["task_id"],
         ),
         _tool(
-            "task.cancel",
+            "task_cancel",
             "Cancel pending/running work. Terminal tasks are unchanged; drain before reuse.",
             {"task_id": {"type": "string"}},
             ["task_id"],
         ),
         _tool(
-            "database.create_bndb",
+            "database_create_bndb",
             "Create .bndb from session.",
             {
                 "session_id": {"type": "string"},
@@ -1075,13 +1075,13 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "path"],
         ),
         _tool(
-            "database.save_auto_snapshot",
+            "database_save_auto_snapshot",
             "Save auto snapshot.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "type.parse_string",
+            "type_parse_string",
             "Parse a single type string.",
             {
                 "session_id": {"type": "string"},
@@ -1091,7 +1091,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "type_source"],
         ),
         _tool(
-            "type.parse_declarations",
+            "type_parse_declarations",
             "Parse C declarations for types/variables/functions.",
             {
                 "session_id": {"type": "string"},
@@ -1103,7 +1103,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "declarations"],
         ),
         _tool(
-            "type.define_user",
+            "type_define_user",
             "Define user type from type source.",
             {
                 "session_id": {"type": "string"},
@@ -1114,7 +1114,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "type_source"],
         ),
         _tool(
-            "type.rename",
+            "type_rename",
             "Rename a type.",
             {
                 "session_id": {"type": "string"},
@@ -1124,13 +1124,13 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "old_name", "new_name"],
         ),
         _tool(
-            "type.undefine_user",
+            "type_undefine_user",
             "Undefine a user type.",
             {"session_id": {"type": "string"}, "name": {"type": "string"}},
             ["session_id", "name"],
         ),
         _tool(
-            "type.import_library_type",
+            "type_import_library_type",
             "Import type from type library.",
             {
                 "session_id": {"type": "string"},
@@ -1140,7 +1140,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "name"],
         ),
         _tool(
-            "type.import_library_object",
+            "type_import_library_object",
             "Import object type from type library.",
             {
                 "session_id": {"type": "string"},
@@ -1150,7 +1150,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "name"],
         ),
         _tool(
-            "type.export_to_library",
+            "type_export_to_library",
             "Export type into a type library.",
             {
                 "session_id": {"type": "string"},
@@ -1162,7 +1162,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "type_library_id", "type_source"],
         ),
         _tool(
-            "type_library.create",
+            "type_library_create",
             "Create and optionally attach a type library.",
             {
                 "session_id": {"type": "string"},
@@ -1173,7 +1173,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "name"],
         ),
         _tool(
-            "type_library.load",
+            "type_library_load",
             "Load and optionally attach a type library.",
             {
                 "session_id": {"type": "string"},
@@ -1183,13 +1183,13 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "path"],
         ),
         _tool(
-            "type_library.list",
+            "type_library_list",
             "List type libraries attached to the view.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "type_library.get",
+            "type_library_get",
             "Get one tracked type library.",
             {
                 "session_id": {"type": "string"},
@@ -1198,7 +1198,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "type_library_id"],
         ),
         _tool(
-            "type_archive.create",
+            "type_archive_create",
             "Create and optionally attach a type archive.",
             {
                 "session_id": {"type": "string"},
@@ -1209,7 +1209,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "path"],
         ),
         _tool(
-            "type_archive.open",
+            "type_archive_open",
             "Open and optionally attach a type archive.",
             {
                 "session_id": {"type": "string"},
@@ -1219,13 +1219,13 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "path"],
         ),
         _tool(
-            "type_archive.list",
+            "type_archive_list",
             "List attached type archives.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "type_archive.get",
+            "type_archive_get",
             "Get one tracked type archive.",
             {
                 "session_id": {"type": "string"},
@@ -1234,7 +1234,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "type_archive_id"],
         ),
         _tool(
-            "type_archive.pull",
+            "type_archive_pull",
             "Pull types from a type archive.",
             {
                 "session_id": {"type": "string"},
@@ -1244,7 +1244,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "type_archive_id", "names"],
         ),
         _tool(
-            "type_archive.push",
+            "type_archive_push",
             "Push types to a type archive.",
             {
                 "session_id": {"type": "string"},
@@ -1254,7 +1254,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "type_archive_id", "names"],
         ),
         _tool(
-            "type_archive.references",
+            "type_archive_references",
             "Query archive incoming/outgoing references for one type.",
             {
                 "type_archive_id": {"type": "string"},
@@ -1263,13 +1263,13 @@ def _definitions() -> list[dict[str, Any]]:
             ["type_archive_id", "name"],
         ),
         _tool(
-            "debug.parsers",
+            "debug_parsers",
             "List debug info parsers valid for this view.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "debug.parse_and_apply",
+            "debug_parse_and_apply",
             "Parse debug info and apply it to the view.",
             {
                 "session_id": {"type": "string"},
@@ -1278,9 +1278,9 @@ def _definitions() -> list[dict[str, Any]]:
             },
             ["session_id"],
         ),
-        _tool("workflow.list", "List registered workflows."),
+        _tool("workflow_list", "List registered workflows."),
         _tool(
-            "workflow.describe",
+            "workflow_describe",
             "Describe workflow topology and settings.",
             {
                 "session_id": {"type": "string"},
@@ -1291,7 +1291,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "workflow.clone",
+            "workflow_clone",
             "Clone workflow.",
             {
                 "session_id": {"type": "string"},
@@ -1301,7 +1301,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "name"],
         ),
         _tool(
-            "workflow.insert",
+            "workflow_insert",
             "Insert activities before an activity.",
             {
                 "session_id": {"type": "string"},
@@ -1312,7 +1312,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "activity", "activities"],
         ),
         _tool(
-            "workflow.insert_after",
+            "workflow_insert_after",
             "Insert activities after an activity.",
             {
                 "session_id": {"type": "string"},
@@ -1323,7 +1323,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "activity", "activities"],
         ),
         _tool(
-            "workflow.remove",
+            "workflow_remove",
             "Remove workflow activity.",
             {
                 "session_id": {"type": "string"},
@@ -1333,7 +1333,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "activity"],
         ),
         _tool(
-            "workflow.graph",
+            "workflow_graph",
             "Summarize workflow graph.",
             {
                 "session_id": {"type": "string"},
@@ -1344,7 +1344,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "workflow.machine.status",
+            "workflow_machine_status",
             "Get workflow machine status.",
             {
                 "session_id": {"type": "string"},
@@ -1353,7 +1353,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "workflow.machine.control",
+            "workflow_machine_control",
             "Control workflow machine runtime.",
             {
                 "session_id": {"type": "string"},
@@ -1368,7 +1368,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "action"],
         ),
         _tool(
-            "il.rewrite.capabilities",
+            "il_rewrite_capabilities",
             "List IL rewrite support for one function and IL level.",
             {
                 "session_id": {"type": "string"},
@@ -1378,7 +1378,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start"],
         ),
         _tool(
-            "il.rewrite.noop_replace",
+            "il_rewrite_noop_replace",
             "Perform no-op IL expression replacement.",
             {
                 "session_id": {"type": "string"},
@@ -1391,7 +1391,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start"],
         ),
         _tool(
-            "il.rewrite.translate_identity",
+            "il_rewrite_translate_identity",
             "Translate IL with identity mapping callback.",
             {
                 "session_id": {"type": "string"},
@@ -1401,7 +1401,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start"],
         ),
         _tool(
-            "uidf.parse_possible_value",
+            "uidf_parse_possible_value",
             "Parse user-informed possible value set string.",
             {
                 "session_id": {"type": "string"},
@@ -1412,7 +1412,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "value", "state"],
         ),
         _tool(
-            "uidf.set_user_var_value",
+            "uidf_set_user_var_value",
             "Set function user variable value.",
             {
                 "session_id": {"type": "string"},
@@ -1426,7 +1426,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "variable_name", "def_addr", "value", "state"],
         ),
         _tool(
-            "uidf.clear_user_var_value",
+            "uidf_clear_user_var_value",
             "Clear function user variable value.",
             {
                 "session_id": {"type": "string"},
@@ -1438,7 +1438,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start", "variable_name", "def_addr"],
         ),
         _tool(
-            "uidf.list_user_var_values",
+            "uidf_list_user_var_values",
             "List all user variable values for a function.",
             {
                 "session_id": {"type": "string"},
@@ -1447,7 +1447,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "function_start"],
         ),
         _tool(
-            "loader.rebase",
+            "loader_rebase",
             "Rebase BinaryView.",
             {
                 "session_id": {"type": "string"},
@@ -1457,13 +1457,13 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "address"],
         ),
         _tool(
-            "loader.load_settings_types",
+            "loader_load_settings_types",
             "List loader settings type names.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "loader.load_settings_get",
+            "loader_load_settings_get",
             "Get loader settings values.",
             {
                 "session_id": {"type": "string"},
@@ -1472,7 +1472,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "type_name"],
         ),
         _tool(
-            "loader.load_settings_set",
+            "loader_load_settings_set",
             "Set one loader setting value.",
             {
                 "session_id": {"type": "string"},
@@ -1484,7 +1484,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "type_name", "key", "value"],
         ),
         _tool(
-            "segment.add_user",
+            "segment_add_user",
             "Add user segment.",
             {
                 "session_id": {"type": "string"},
@@ -1501,7 +1501,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "start", "length"],
         ),
         _tool(
-            "segment.remove_user",
+            "segment_remove_user",
             "Remove user segment.",
             {
                 "session_id": {"type": "string"},
@@ -1511,7 +1511,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "start"],
         ),
         _tool(
-            "section.add_user",
+            "section_add_user",
             "Add user section.",
             {
                 "session_id": {"type": "string"},
@@ -1526,7 +1526,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "name", "start", "length"],
         ),
         _tool(
-            "section.remove_user",
+            "section_remove_user",
             "Remove user section.",
             {
                 "session_id": {"type": "string"},
@@ -1535,7 +1535,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "name"],
         ),
         _tool(
-            "external.library_add",
+            "external_library_add",
             "Add external library.",
             {
                 "session_id": {"type": "string"},
@@ -1545,13 +1545,13 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "name"],
         ),
         _tool(
-            "external.library_list",
+            "external_library_list",
             "List external libraries.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "external.library_remove",
+            "external_library_remove",
             "Remove external library.",
             {
                 "session_id": {"type": "string"},
@@ -1560,7 +1560,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "name"],
         ),
         _tool(
-            "external.location_add",
+            "external_location_add",
             "Add external location mapping.",
             {
                 "session_id": {"type": "string"},
@@ -1573,7 +1573,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "source_address"],
         ),
         _tool(
-            "external.location_get",
+            "external_location_get",
             "Get external location mapping.",
             {
                 "session_id": {"type": "string"},
@@ -1582,7 +1582,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "source_address"],
         ),
         _tool(
-            "external.location_remove",
+            "external_location_remove",
             "Remove external location mapping.",
             {
                 "session_id": {"type": "string"},
@@ -1591,13 +1591,13 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "source_address"],
         ),
         _tool(
-            "arch.info",
+            "arch_info",
             "Get architecture and platform metadata.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "arch.disasm_bytes",
+            "arch_disasm_bytes",
             "Disassemble bytes with selected architecture.",
             {
                 "session_id": {"type": "string"},
@@ -1608,7 +1608,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "data_hex"],
         ),
         _tool(
-            "arch.assemble",
+            "arch_assemble",
             "Assemble instruction text with selected architecture.",
             {
                 "session_id": {"type": "string"},
@@ -1619,7 +1619,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "asm"],
         ),
         _tool(
-            "transform.inspect",
+            "transform_inspect",
             "Inspect/process transform pipeline. Requires session_id or path.",
             {
                 "session_id": {"type": "string"},
@@ -1629,31 +1629,31 @@ def _definitions() -> list[dict[str, Any]]:
             },
         ),
         _tool(
-            "project.create",
+            "project_create",
             "Create project.",
             {"path": {"type": "string"}, "name": {"type": "string"}},
             ["path", "name"],
         ),
         _tool(
-            "project.open",
+            "project_open",
             "Open project.",
             {"path": {"type": "string"}},
             ["path"],
         ),
         _tool(
-            "project.close",
+            "project_close",
             "Close tracked project.",
             {"project_id": {"type": "string"}},
             ["project_id"],
         ),
         _tool(
-            "project.list",
+            "project_list",
             "List project folders/files.",
             {"project_id": {"type": "string"}},
             ["project_id"],
         ),
         _tool(
-            "project.create_folder",
+            "project_create_folder",
             "Create project folder.",
             {
                 "project_id": {"type": "string"},
@@ -1664,7 +1664,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["project_id", "name"],
         ),
         _tool(
-            "project.create_file",
+            "project_create_file",
             "Create project file from base64 data.",
             {
                 "project_id": {"type": "string"},
@@ -1676,7 +1676,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["project_id", "name", "data_base64"],
         ),
         _tool(
-            "project.metadata_store",
+            "project_metadata_store",
             "Store project metadata.",
             {
                 "project_id": {"type": "string"},
@@ -1686,25 +1686,25 @@ def _definitions() -> list[dict[str, Any]]:
             ["project_id", "key", "value"],
         ),
         _tool(
-            "project.metadata_query",
+            "project_metadata_query",
             "Query project metadata.",
             {"project_id": {"type": "string"}, "key": {"type": "string"}},
             ["project_id", "key"],
         ),
         _tool(
-            "project.metadata_remove",
+            "project_metadata_remove",
             "Remove project metadata.",
             {"project_id": {"type": "string"}, "key": {"type": "string"}},
             ["project_id", "key"],
         ),
         _tool(
-            "database.info",
+            "database_info",
             "Get database status for session.",
             {"session_id": {"type": "string"}},
             ["session_id"],
         ),
         _tool(
-            "database.snapshots",
+            "database_snapshots",
             "List database snapshots.",
             {
                 "session_id": {"type": "string"},
@@ -1714,13 +1714,13 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "database.read_global",
+            "database_read_global",
             "Read database global string key.",
             {"session_id": {"type": "string"}, "key": {"type": "string"}},
             ["session_id", "key"],
         ),
         _tool(
-            "database.write_global",
+            "database_write_global",
             "Write database global string key.",
             {
                 "session_id": {"type": "string"},
@@ -1730,7 +1730,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "key", "value"],
         ),
         _tool(
-            "plugin.valid_commands",
+            "plugin_valid_commands",
             "List context-valid plugin commands.",
             {
                 "session_id": {"type": "string"},
@@ -1740,7 +1740,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "plugin.execute",
+            "plugin_execute",
             "Execute a context-valid plugin command.",
             {
                 "session_id": {"type": "string"},
@@ -1751,14 +1751,14 @@ def _definitions() -> list[dict[str, Any]]:
             },
             ["session_id", "name"],
         ),
-        _tool("plugin_repo.status", "List plugin repositories and plugin states."),
+        _tool("plugin_repo_status", "List plugin repositories and plugin states."),
         _tool(
-            "plugin_repo.check_updates",
+            "plugin_repo_check_updates",
             "Check plugin repository updates.",
             {"perform": {"type": "boolean"}},
         ),
         _tool(
-            "plugin_repo.plugin_action",
+            "plugin_repo_plugin_action",
             "Run install/uninstall/enable/disable action on repository plugin.",
             {
                 "repository_path": {"type": "string"},
@@ -1768,7 +1768,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["repository_path", "plugin_path", "action"],
         ),
         _tool(
-            "baseaddr.detect",
+            "baseaddr_detect",
             "Run base-address detection.",
             {
                 "session_id": {"type": "string"},
@@ -1784,7 +1784,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id"],
         ),
         _tool(
-            "baseaddr.reasons",
+            "baseaddr_reasons",
             "Get base-address detection reasons.",
             {
                 "session_id": {"type": "string"},
@@ -1793,7 +1793,7 @@ def _definitions() -> list[dict[str, Any]]:
             ["session_id", "base_address"],
         ),
         _tool(
-            "baseaddr.abort",
+            "baseaddr_abort",
             "Abort base-address detection.",
             {"session_id": {"type": "string"}},
             ["session_id"],
@@ -1803,29 +1803,80 @@ def _definitions() -> list[dict[str, Any]]:
 
 TOOL_DEFINITIONS = _definitions()
 
+# Tool names are flat identifiers (`[A-Za-z0-9_-]`) so they survive proxies and SDKs that
+# reject dots. Groups are declared instead of derived, because some group names themselves
+# contain underscores (for example `type_library_create` belongs to `type_library`).
+TOOL_GROUPS: tuple[str, ...] = (
+    "analysis",
+    "annotation",
+    "arch",
+    "baseaddr",
+    "binary",
+    "binja",
+    "data",
+    "database",
+    "debug",
+    "disasm",
+    "external",
+    "function",
+    "health",
+    "il",
+    "loader",
+    "mcp",
+    "memory",
+    "metadata",
+    "patch",
+    "plugin",
+    "plugin_repo",
+    "project",
+    "search",
+    "section",
+    "segment",
+    "session",
+    "task",
+    "transform",
+    "type",
+    "type_archive",
+    "type_library",
+    "uidf",
+    "undo",
+    "value",
+    "workflow",
+    "xref",
+)
+
+
+def tool_group(name: str) -> str:
+    """Return the declared group owning ``name`` using longest-prefix matching."""
+    matches = [group for group in TOOL_GROUPS if name.startswith(group + "_")]
+    if not matches:
+        raise ValueError(f"tool name has no declared group: {name}")
+    return max(matches, key=len)
+
+
 TOOL_DEFAULTS: dict[str, dict[str, Any]] = {
-    "analysis.abort": {},
-    "analysis.progress": {},
-    "analysis.set_hold": {},
-    "analysis.status": {},
-    "analysis.update": {},
-    "analysis.update_and_wait": {},
-    "annotation.add_tag": {"icon": "M"},
-    "annotation.define_data_var": {"name": None, "type_name": "char", "width": 1},
-    "annotation.define_symbol": {"symbol_type": "FunctionSymbol"},
-    "annotation.get_comment": {},
-    "annotation.get_tags": {},
-    "annotation.rename_data_var": {},
-    "annotation.rename_function": {},
-    "annotation.rename_symbol": {},
-    "annotation.set_comment": {},
-    "annotation.undefine_data_var": {},
-    "annotation.undefine_symbol": {},
-    "arch.assemble": {"address": 0, "arch_name": None},
-    "arch.disasm_bytes": {"address": 0, "arch_name": None},
-    "arch.info": {},
-    "baseaddr.abort": {},
-    "baseaddr.detect": {
+    "analysis_abort": {},
+    "analysis_progress": {},
+    "analysis_set_hold": {},
+    "analysis_status": {},
+    "analysis_update": {},
+    "analysis_update_and_wait": {},
+    "annotation_add_tag": {"icon": "M"},
+    "annotation_define_data_var": {"name": None, "type_name": "char", "width": 1},
+    "annotation_define_symbol": {"symbol_type": "FunctionSymbol"},
+    "annotation_get_comment": {},
+    "annotation_get_tags": {},
+    "annotation_rename_data_var": {},
+    "annotation_rename_function": {},
+    "annotation_rename_symbol": {},
+    "annotation_set_comment": {},
+    "annotation_undefine_data_var": {},
+    "annotation_undefine_symbol": {},
+    "arch_assemble": {"address": 0, "arch_name": None},
+    "arch_disasm_bytes": {"address": 0, "arch_name": None},
+    "arch_info": {},
+    "baseaddr_abort": {},
+    "baseaddr_detect": {
         "algorithm": "instruction",
         "alignment": 1024,
         "analysis": "full",
@@ -1835,121 +1886,121 @@ TOOL_DEFAULTS: dict[str, dict[str, Any]] = {
         "max_pointers": 128,
         "min_strlen": 10,
     },
-    "baseaddr.reasons": {},
-    "binary.basic_blocks_at": {"limit": 100, "offset": 0},
-    "binary.data_vars": {"limit": 100, "offset": 0},
-    "binary.functions": {"limit": 100, "offset": 0},
-    "binary.functions_at": {},
-    "binary.get_function_at": {},
-    "binary.get_function_disassembly_at": {},
-    "binary.get_function_il_at": {"level": "mlil", "ssa": False},
-    "binary.save": {},
-    "binary.search_text": {"limit": 50},
-    "binary.sections": {"limit": 100, "offset": 0},
-    "binary.segments": {"limit": 100, "offset": 0},
-    "binary.strings": {"limit": 100, "offset": 0},
-    "binary.summary": {},
-    "binary.symbols": {"limit": 100, "offset": 0},
-    "binja.call": {"args": [], "kwargs": {}, "session_id": None},
-    "binja.eval": {"session_id": None},
-    "binja.info": {},
-    "data.typed_at": {},
-    "database.create_bndb": {},
-    "database.info": {},
-    "database.read_global": {},
-    "database.save_auto_snapshot": {},
-    "database.snapshots": {"limit": 100, "offset": 0},
-    "database.write_global": {},
-    "debug.parse_and_apply": {"debug_path": None, "parser_name": None},
-    "debug.parsers": {},
-    "disasm.function": {},
-    "disasm.linear": {"limit": 200, "offset": 0},
-    "disasm.range": {"limit": 200},
-    "external.library_add": {"auto": False},
-    "external.library_list": {},
-    "external.library_remove": {},
-    "external.location_add": {
+    "baseaddr_reasons": {},
+    "binary_basic_blocks_at": {"limit": 100, "offset": 0},
+    "binary_data_vars": {"limit": 100, "offset": 0},
+    "binary_functions": {"limit": 100, "offset": 0},
+    "binary_functions_at": {},
+    "binary_get_function_at": {},
+    "binary_get_function_disassembly_at": {},
+    "binary_get_function_il_at": {"level": "mlil", "ssa": False},
+    "binary_save": {},
+    "binary_search_text": {"limit": 50},
+    "binary_sections": {"limit": 100, "offset": 0},
+    "binary_segments": {"limit": 100, "offset": 0},
+    "binary_strings": {"limit": 100, "offset": 0},
+    "binary_summary": {},
+    "binary_symbols": {"limit": 100, "offset": 0},
+    "binja_call": {"args": [], "kwargs": {}, "session_id": None},
+    "binja_eval": {"session_id": None},
+    "binja_info": {},
+    "data_typed_at": {},
+    "database_create_bndb": {},
+    "database_info": {},
+    "database_read_global": {},
+    "database_save_auto_snapshot": {},
+    "database_snapshots": {"limit": 100, "offset": 0},
+    "database_write_global": {},
+    "debug_parse_and_apply": {"debug_path": None, "parser_name": None},
+    "debug_parsers": {},
+    "disasm_function": {},
+    "disasm_linear": {"limit": 200, "offset": 0},
+    "disasm_range": {"limit": 200},
+    "external_library_add": {"auto": False},
+    "external_library_list": {},
+    "external_library_remove": {},
+    "external_location_add": {
         "auto": False,
         "library_name": None,
         "target_address": None,
         "target_symbol": None,
     },
-    "external.location_get": {},
-    "external.location_remove": {},
-    "function.basic_blocks": {"limit": 100, "offset": 0},
-    "function.callees": {},
-    "function.callers": {},
-    "function.metadata_query": {},
-    "function.metadata_remove": {},
-    "function.metadata_store": {},
-    "function.ssa_memory_def_use": {"level": "mlil"},
-    "function.ssa_var_def_use": {"level": "mlil"},
-    "function.var_refs": {"level": "mlil"},
-    "function.var_refs_from": {"length": None, "level": "mlil"},
-    "function.variables": {},
-    "health.ping": {},
-    "il.address_to_index": {"level": "mlil", "ssa": False},
-    "il.function": {"level": "mlil", "limit": 200, "offset": 0, "ssa": False},
-    "il.index_to_address": {"level": "mlil", "ssa": False},
-    "il.instruction_by_addr": {"level": "mlil", "ssa": False},
-    "il.rewrite.capabilities": {"level": "mlil"},
-    "il.rewrite.noop_replace": {
+    "external_location_get": {},
+    "external_location_remove": {},
+    "function_basic_blocks": {"limit": 100, "offset": 0},
+    "function_callees": {},
+    "function_callers": {},
+    "function_metadata_query": {},
+    "function_metadata_remove": {},
+    "function_metadata_store": {},
+    "function_ssa_memory_def_use": {"level": "mlil"},
+    "function_ssa_var_def_use": {"level": "mlil"},
+    "function_var_refs": {"level": "mlil"},
+    "function_var_refs_from": {"length": None, "level": "mlil"},
+    "function_variables": {},
+    "health_ping": {},
+    "il_address_to_index": {"level": "mlil", "ssa": False},
+    "il_function": {"level": "mlil", "limit": 200, "offset": 0, "ssa": False},
+    "il_index_to_address": {"level": "mlil", "ssa": False},
+    "il_instruction_by_addr": {"level": "mlil", "ssa": False},
+    "il_rewrite_capabilities": {"level": "mlil"},
+    "il_rewrite_noop_replace": {
         "finalize": True,
         "generate_ssa_form": True,
         "index": None,
         "level": "mlil",
     },
-    "il.rewrite.translate_identity": {"level": "mlil"},
-    "loader.load_settings_get": {},
-    "loader.load_settings_set": {"value_type": "string"},
-    "loader.load_settings_types": {},
-    "loader.rebase": {"force": False},
-    "mcp.response_format": {},
-    "memory.insert": {},
-    "memory.read": {},
-    "memory.reader_read": {"endian": "little"},
-    "memory.remove": {},
-    "memory.write": {},
-    "memory.writer_write": {"endian": "little"},
-    "metadata.query": {},
-    "metadata.remove": {},
-    "metadata.store": {},
-    "patch.always_branch": {},
-    "patch.assemble": {},
-    "patch.convert_to_nop": {},
-    "patch.invert_branch": {},
-    "patch.never_branch": {},
-    "patch.skip_and_return_value": {},
-    "patch.status": {},
-    "plugin.execute": {"address": None, "length": 0, "perform": False},
-    "plugin.valid_commands": {"address": None, "length": 0},
-    "plugin_repo.check_updates": {"perform": False},
-    "plugin_repo.plugin_action": {},
-    "plugin_repo.status": {},
-    "project.close": {},
-    "project.create": {},
-    "project.create_file": {"description": "", "folder_id": None},
-    "project.create_folder": {"description": "", "parent_folder_id": None},
-    "project.list": {},
-    "project.metadata_query": {},
-    "project.metadata_remove": {},
-    "project.metadata_store": {},
-    "project.open": {},
-    "search.all_constant": {"limit": 100},
-    "search.all_data": {"limit": 100},
-    "search.all_text": {"limit": 100, "regex": False},
-    "search.data": {"end": None, "limit": 100, "start": None},
-    "search.next_constant": {},
-    "search.next_data": {},
-    "search.next_text": {},
-    "section.add_user": {
+    "il_rewrite_translate_identity": {"level": "mlil"},
+    "loader_load_settings_get": {},
+    "loader_load_settings_set": {"value_type": "string"},
+    "loader_load_settings_types": {},
+    "loader_rebase": {"force": False},
+    "mcp_response_format": {},
+    "memory_insert": {},
+    "memory_read": {},
+    "memory_reader_read": {"endian": "little"},
+    "memory_remove": {},
+    "memory_write": {},
+    "memory_writer_write": {"endian": "little"},
+    "metadata_query": {},
+    "metadata_remove": {},
+    "metadata_store": {},
+    "patch_always_branch": {},
+    "patch_assemble": {},
+    "patch_convert_to_nop": {},
+    "patch_invert_branch": {},
+    "patch_never_branch": {},
+    "patch_skip_and_return_value": {},
+    "patch_status": {},
+    "plugin_execute": {"address": None, "length": 0, "perform": False},
+    "plugin_valid_commands": {"address": None, "length": 0},
+    "plugin_repo_check_updates": {"perform": False},
+    "plugin_repo_plugin_action": {},
+    "plugin_repo_status": {},
+    "project_close": {},
+    "project_create": {},
+    "project_create_file": {"description": "", "folder_id": None},
+    "project_create_folder": {"description": "", "parent_folder_id": None},
+    "project_list": {},
+    "project_metadata_query": {},
+    "project_metadata_remove": {},
+    "project_metadata_store": {},
+    "project_open": {},
+    "search_all_constant": {"limit": 100},
+    "search_all_data": {"limit": 100},
+    "search_all_text": {"limit": 100, "regex": False},
+    "search_data": {"end": None, "limit": 100, "start": None},
+    "search_next_constant": {},
+    "search_next_data": {},
+    "search_next_text": {},
+    "section_add_user": {
         "align": 1,
         "entry_size": 1,
         "semantics": "DefaultSectionSemantics",
         "type_name": "",
     },
-    "section.remove_user": {},
-    "segment.add_user": {
+    "section_remove_user": {},
+    "segment_add_user": {
         "contains_code": False,
         "contains_data": True,
         "data_length": 0,
@@ -1958,75 +2009,75 @@ TOOL_DEFAULTS: dict[str, dict[str, Any]] = {
         "readable": True,
         "writable": False,
     },
-    "segment.remove_user": {"length": 0},
-    "session.close": {},
-    "session.list": {},
-    "session.mode": {},
-    "session.open": {
+    "segment_remove_user": {"length": 0},
+    "session_close": {},
+    "session_list": {},
+    "session_mode": {},
+    "session_open": {
         "deterministic": True,
         "options": {},
         "read_only": True,
         "update_analysis": True,
     },
-    "session.open_bytes": {
+    "session_open_bytes": {
         "deterministic": True,
         "filename": "binary_ninja_headless_mcp_bytes.bin",
         "options": {},
         "read_only": True,
         "update_analysis": True,
     },
-    "session.open_existing": {
+    "session_open_existing": {
         "deterministic": True,
         "options": {},
         "read_only": True,
         "update_analysis": False,
     },
-    "session.set_mode": {"deterministic": None, "read_only": None},
-    "task.analysis_update": {},
-    "task.cancel": {},
-    "task.result": {},
-    "task.search_text": {"limit": 50},
-    "task.status": {},
-    "transform.inspect": {"mode": "full", "path": None, "process": False, "session_id": None},
-    "type.define_user": {"import_dependencies": True, "name": None},
-    "type.export_to_library": {"import_dependencies": True, "name": None},
-    "type.import_library_object": {"type_library_id": None},
-    "type.import_library_type": {"type_library_id": None},
-    "type.parse_declarations": {"import_dependencies": True, "include_dirs": None, "options": None},
-    "type.parse_string": {"import_dependencies": True},
-    "type.rename": {},
-    "type.undefine_user": {},
-    "type_archive.create": {"attach": True, "platform_name": None},
-    "type_archive.get": {},
-    "type_archive.list": {},
-    "type_archive.open": {"attach": True},
-    "type_archive.pull": {},
-    "type_archive.push": {},
-    "type_archive.references": {},
-    "type_library.create": {"add_to_view": True, "path": None},
-    "type_library.get": {},
-    "type_library.list": {},
-    "type_library.load": {"add_to_view": True},
-    "uidf.clear_user_var_value": {"after": True},
-    "uidf.list_user_var_values": {},
-    "uidf.parse_possible_value": {"here": None},
-    "uidf.set_user_var_value": {"after": True},
-    "undo.begin": {},
-    "undo.commit": {"transaction_id": None},
-    "undo.redo": {},
-    "undo.revert": {"transaction_id": None},
-    "undo.undo": {},
-    "value.flags_at": {},
-    "value.possible": {"level": "mlil", "ssa": False},
-    "value.reg": {"after": False},
-    "value.stack": {"after": False},
-    "workflow.clone": {"register": False},
-    "workflow.describe": {"activity": "", "immediate": True, "workflow_name": None},
-    "workflow.graph": {"activity": "", "sequential": False, "workflow_name": None},
-    "workflow.insert": {"workflow_name": None},
-    "workflow.insert_after": {"workflow_name": None},
-    "workflow.list": {},
-    "workflow.machine.control": {
+    "session_set_mode": {"deterministic": None, "read_only": None},
+    "task_analysis_update": {},
+    "task_cancel": {},
+    "task_result": {},
+    "task_search_text": {"limit": 50},
+    "task_status": {},
+    "transform_inspect": {"mode": "full", "path": None, "process": False, "session_id": None},
+    "type_define_user": {"import_dependencies": True, "name": None},
+    "type_export_to_library": {"import_dependencies": True, "name": None},
+    "type_import_library_object": {"type_library_id": None},
+    "type_import_library_type": {"type_library_id": None},
+    "type_parse_declarations": {"import_dependencies": True, "include_dirs": None, "options": None},
+    "type_parse_string": {"import_dependencies": True},
+    "type_rename": {},
+    "type_undefine_user": {},
+    "type_archive_create": {"attach": True, "platform_name": None},
+    "type_archive_get": {},
+    "type_archive_list": {},
+    "type_archive_open": {"attach": True},
+    "type_archive_pull": {},
+    "type_archive_push": {},
+    "type_archive_references": {},
+    "type_library_create": {"add_to_view": True, "path": None},
+    "type_library_get": {},
+    "type_library_list": {},
+    "type_library_load": {"add_to_view": True},
+    "uidf_clear_user_var_value": {"after": True},
+    "uidf_list_user_var_values": {},
+    "uidf_parse_possible_value": {"here": None},
+    "uidf_set_user_var_value": {"after": True},
+    "undo_begin": {},
+    "undo_commit": {"transaction_id": None},
+    "undo_redo": {},
+    "undo_revert": {"transaction_id": None},
+    "undo_undo": {},
+    "value_flags_at": {},
+    "value_possible": {"level": "mlil", "ssa": False},
+    "value_reg": {"after": False},
+    "value_stack": {"after": False},
+    "workflow_clone": {"register": False},
+    "workflow_describe": {"activity": "", "immediate": True, "workflow_name": None},
+    "workflow_graph": {"activity": "", "sequential": False, "workflow_name": None},
+    "workflow_insert": {"workflow_name": None},
+    "workflow_insert_after": {"workflow_name": None},
+    "workflow_list": {},
+    "workflow_machine_control": {
         "activities": None,
         "activity": None,
         "advanced": True,
@@ -2034,10 +2085,10 @@ TOOL_DEFAULTS: dict[str, dict[str, Any]] = {
         "incremental": False,
         "workflow_name": None,
     },
-    "workflow.machine.status": {"workflow_name": None},
-    "workflow.remove": {"workflow_name": None},
-    "xref.code_refs_from": {"length": None},
-    "xref.code_refs_to": {"limit": 100, "offset": 0},
-    "xref.data_refs_from": {"length": None},
-    "xref.data_refs_to": {"limit": 100},
+    "workflow_machine_status": {"workflow_name": None},
+    "workflow_remove": {"workflow_name": None},
+    "xref_code_refs_from": {"length": None},
+    "xref_code_refs_to": {"limit": 100, "offset": 0},
+    "xref_data_refs_from": {"length": None},
+    "xref_data_refs_to": {"limit": 100},
 }

@@ -1,7 +1,8 @@
 import ast
+import re
 from pathlib import Path
 
-from binary_ninja_headless_mcp.catalog import TOOL_DEFINITIONS
+from binary_ninja_headless_mcp.catalog import TOOL_DEFINITIONS, TOOL_GROUPS, tool_group
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVER_PATH = ROOT / "binary_ninja_headless_mcp" / "server.py"
@@ -136,6 +137,22 @@ def _array_without_items(schema: object, path: str, issues: list[str]) -> None:
     items = schema.get("items")
     if isinstance(items, dict):
         _array_without_items(items, f"{path}.items", issues)
+
+
+def test_tool_names_are_proxy_safe_identifiers() -> None:
+    """OpenAI/Anthropic SDKs and proxies such as LiteLLM reject names outside
+    [A-Za-z0-9_-]{1,64}."""
+    invalid = sorted(
+        spec["name"]
+        for spec in TOOL_DEFINITIONS
+        if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", spec["name"])
+    )
+    assert not invalid, "tool names must be proxy-safe identifiers: " + ", ".join(invalid)
+
+
+def test_every_tool_name_belongs_to_a_declared_group() -> None:
+    unused = set(TOOL_GROUPS) - {tool_group(spec["name"]) for spec in TOOL_DEFINITIONS}
+    assert not unused, "declared groups without tools: " + ", ".join(sorted(unused))
 
 
 def test_array_schemas_declare_items() -> None:

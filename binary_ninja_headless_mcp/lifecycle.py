@@ -176,14 +176,14 @@ class LifecycleMixin:
         """Lease views for an entire MCP call, including native serialization."""
         records = []
         metadata_tools = {
-            "health.ping",
-            "mcp.response_format",
-            "task.status",
-            "task.result",
-            "task.cancel",
-            "session.close",
-            "analysis.status",
-            "session.list",
+            "health_ping",
+            "mcp_response_format",
+            "task_status",
+            "task_result",
+            "task_cancel",
+            "session_close",
+            "analysis_status",
+            "session_list",
         }
         with self._condition:
             if name not in metadata_tools:
@@ -193,15 +193,15 @@ class LifecycleMixin:
                 for key in ("session_id", "source_session_id")
                 if isinstance(value := arguments.get(key), str)
             }
-            if name in {"session.list", "binja.eval", "binja.call"}:
+            if name in {"session_list", "binja_eval", "binja_call"}:
                 ids.update(self._sessions)
-            if name == "session.close":
+            if name == "session_close":
                 ids.clear()
             for sid in sorted(ids):
                 record = self._lookup_record(sid)
                 if (record.closing or record.replacing) and name in {
-                    "analysis.status",
-                    "session.list",
+                    "analysis_status",
+                    "session_list",
                 }:
                     continue
                 if record.closing:
@@ -426,7 +426,7 @@ class LifecycleMixin:
     @staticmethod
     def _check_analysis_suspension(native: dict[str, Any]) -> None:
         if native.get("state") == "HoldState":
-            raise BinjaBackendError("native analysis is held; release analysis.set_hold and retry")
+            raise BinjaBackendError("native analysis is held; release analysis_set_hold and retry")
         if native.get("is_aborted"):
             raise BinjaBackendError(
                 "native analysis is aborted or disabled; enable the workflow and retry"
@@ -640,7 +640,7 @@ class LifecycleMixin:
                     remaining = deadline - time.monotonic()
                     if remaining <= 0:
                         raise BinjaBackendError(
-                            "timed out draining session; resources retained; retry session.close",
+                            "timed out draining session; resources retained; retry session_close",
                             session_id=session_id,
                             status="closing",
                         )
@@ -652,7 +652,7 @@ class LifecycleMixin:
                 record.close_abort.result(timeout=max(0.0, deadline - time.monotonic()))
             except TimeoutError as exc:
                 raise BinjaBackendError(
-                    "timed out aborting native analysis; resources retained; retry session.close",
+                    "timed out aborting native analysis; resources retained; retry session_close",
                     session_id=session_id,
                     status="closing",
                 ) from exc
@@ -662,7 +662,7 @@ class LifecycleMixin:
                 record.close_abort = None
                 raise BinjaBackendError(
                     f"failed to abort native analysis: {exc}; "
-                    "resources retained; retry session.close",
+                    "resources retained; retry session_close",
                     session_id=session_id,
                     status="closing",
                 ) from exc
@@ -670,7 +670,7 @@ class LifecycleMixin:
                 self._close_view(record.view)
             except Exception as exc:
                 raise BinjaBackendError(
-                    f"failed to close native view: {exc}; resources retained; retry session.close",
+                    f"failed to close native view: {exc}; resources retained; retry session_close",
                     session_id=session_id,
                     status="closing",
                 ) from exc

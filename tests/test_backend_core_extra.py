@@ -189,7 +189,7 @@ def test_rebase_blocked_while_async_task_active(
     task_id = "pending-task"
     real_backend._tasks[task_id] = TaskRecord(
         task_id=task_id,
-        kind="analysis.update_and_wait",
+        kind="analysis_update_and_wait",
         future=Future(),
         session_id=session_id,
     )

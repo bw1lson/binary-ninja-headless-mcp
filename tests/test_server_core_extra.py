@@ -29,7 +29,7 @@ def _call_tool(
 def _open_rw(server: SimpleMcpServer, sample_binary_path: str, request_id: int) -> str:
     opened = _call_tool(
         server,
-        "session.open",
+        "session_open",
         {
             "path": sample_binary_path,
             "update_analysis": False,
@@ -65,55 +65,55 @@ def test_tools_list_includes_new_core_tooling(real_server: SimpleMcpServer) -> N
 
     names = {tool["name"] for tool in listed["result"]["tools"]}
     expected = {
-        "session.open_bytes",
-        "session.open_existing",
-        "binary.functions_at",
-        "binary.basic_blocks_at",
-        "function.basic_blocks",
-        "disasm.linear",
-        "search.data",
-        "search.next_text",
-        "search.all_text",
-        "search.next_data",
-        "search.all_data",
-        "search.next_constant",
-        "search.all_constant",
-        "function.variables",
-        "function.var_refs",
-        "value.reg",
-        "value.stack",
-        "value.possible",
-        "memory.read",
-        "memory.write",
-        "memory.insert",
-        "memory.remove",
-        "data.typed_at",
-        "annotation.rename_function",
-        "annotation.rename_symbol",
-        "annotation.undefine_symbol",
-        "annotation.define_symbol",
-        "annotation.rename_data_var",
-        "annotation.define_data_var",
-        "annotation.undefine_data_var",
-        "annotation.set_comment",
-        "annotation.get_comment",
-        "annotation.add_tag",
-        "annotation.get_tags",
-        "metadata.store",
-        "metadata.query",
-        "metadata.remove",
-        "patch.assemble",
-        "patch.status",
-        "patch.convert_to_nop",
-        "patch.always_branch",
-        "patch.never_branch",
-        "patch.invert_branch",
-        "patch.skip_and_return_value",
-        "undo.begin",
-        "undo.commit",
-        "undo.revert",
-        "undo.undo",
-        "undo.redo",
+        "session_open_bytes",
+        "session_open_existing",
+        "binary_functions_at",
+        "binary_basic_blocks_at",
+        "function_basic_blocks",
+        "disasm_linear",
+        "search_data",
+        "search_next_text",
+        "search_all_text",
+        "search_next_data",
+        "search_all_data",
+        "search_next_constant",
+        "search_all_constant",
+        "function_variables",
+        "function_var_refs",
+        "value_reg",
+        "value_stack",
+        "value_possible",
+        "memory_read",
+        "memory_write",
+        "memory_insert",
+        "memory_remove",
+        "data_typed_at",
+        "annotation_rename_function",
+        "annotation_rename_symbol",
+        "annotation_undefine_symbol",
+        "annotation_define_symbol",
+        "annotation_rename_data_var",
+        "annotation_define_data_var",
+        "annotation_undefine_data_var",
+        "annotation_set_comment",
+        "annotation_get_comment",
+        "annotation_add_tag",
+        "annotation_get_tags",
+        "metadata_store",
+        "metadata_query",
+        "metadata_remove",
+        "patch_assemble",
+        "patch_status",
+        "patch_convert_to_nop",
+        "patch_always_branch",
+        "patch_never_branch",
+        "patch_invert_branch",
+        "patch_skip_and_return_value",
+        "undo_begin",
+        "undo_commit",
+        "undo_revert",
+        "undo_undo",
+        "undo_redo",
     }
     assert expected.issubset(names)
 
@@ -130,7 +130,7 @@ def test_transform_inspect_schema_and_validation(real_server: SimpleMcpServer) -
     assert listed is not None
 
     tool = next(
-        item for item in listed["result"]["tools"] if item.get("name") == "transform.inspect"
+        item for item in listed["result"]["tools"] if item.get("name") == "transform_inspect"
     )
     schema = tool["inputSchema"]
     # oneOf removed from top-level schema for Claude API compatibility;
@@ -144,7 +144,7 @@ def test_transform_inspect_schema_and_validation(real_server: SimpleMcpServer) -
             "jsonrpc": "2.0",
             "id": 3,
             "method": "tools/call",
-            "params": {"name": "transform.inspect", "arguments": {}},
+            "params": {"name": "transform_inspect", "arguments": {}},
         }
     )
     assert response is not None
@@ -162,7 +162,7 @@ def test_session_bytes_existing_navigation_and_search(
 
     session_from_bytes = _call_tool(
         real_server,
-        "session.open_bytes",
+        "session_open_bytes",
         {
             "data_base64": data_base64,
             "filename": "hello-bytes",
@@ -176,7 +176,7 @@ def test_session_bytes_existing_navigation_and_search(
     source_session_id = _open_rw(real_server, sample_binary_path, request_id=11)
     session_existing = _call_tool(
         real_server,
-        "session.open_existing",
+        "session_open_existing",
         {
             "source_session_id": source_session_id,
             "read_only": True,
@@ -188,14 +188,14 @@ def test_session_bytes_existing_navigation_and_search(
 
     _call_tool(
         real_server,
-        "analysis.update_and_wait",
+        "analysis_update_and_wait",
         {"session_id": source_session_id},
         request_id=13,
     )
 
     summary = _call_tool(
         real_server,
-        "binary.summary",
+        "binary_summary",
         {"session_id": source_session_id},
         request_id=14,
     )
@@ -204,7 +204,7 @@ def test_session_bytes_existing_navigation_and_search(
 
     functions = _call_tool(
         real_server,
-        "binary.functions",
+        "binary_functions",
         {"session_id": source_session_id, "offset": 0, "limit": 200},
         request_id=15,
     )
@@ -212,7 +212,7 @@ def test_session_bytes_existing_navigation_and_search(
 
     functions_at = _call_tool(
         real_server,
-        "binary.functions_at",
+        "binary_functions_at",
         {"session_id": source_session_id, "address": main_start},
         request_id=16,
     )
@@ -220,7 +220,7 @@ def test_session_bytes_existing_navigation_and_search(
 
     blocks_at = _call_tool(
         real_server,
-        "binary.basic_blocks_at",
+        "binary_basic_blocks_at",
         {"session_id": source_session_id, "address": main_start, "offset": 0, "limit": 1},
         request_id=17,
     )
@@ -229,7 +229,7 @@ def test_session_bytes_existing_navigation_and_search(
 
     function_blocks = _call_tool(
         real_server,
-        "function.basic_blocks",
+        "function_basic_blocks",
         {"session_id": source_session_id, "function_start": main_start, "offset": 0, "limit": 1},
         request_id=18,
     )
@@ -238,7 +238,7 @@ def test_session_bytes_existing_navigation_and_search(
 
     linear = _call_tool(
         real_server,
-        "disasm.linear",
+        "disasm_linear",
         {"session_id": source_session_id, "offset": 0, "limit": 20},
         request_id=19,
     )
@@ -246,7 +246,7 @@ def test_session_bytes_existing_navigation_and_search(
 
     search_data = _call_tool(
         real_server,
-        "search.data",
+        "search_data",
         {
             "session_id": source_session_id,
             "data_hex": "48656c6c6f",
@@ -260,13 +260,13 @@ def test_session_bytes_existing_navigation_and_search(
 
     _call_tool(
         real_server,
-        "search.next_text",
+        "search_next_text",
         {"session_id": source_session_id, "start": start, "query": "Hello"},
         request_id=21,
     )
     _call_tool(
         real_server,
-        "search.all_text",
+        "search_all_text",
         {
             "session_id": source_session_id,
             "start": start,
@@ -278,13 +278,13 @@ def test_session_bytes_existing_navigation_and_search(
     )
     _call_tool(
         real_server,
-        "search.next_data",
+        "search_next_data",
         {"session_id": source_session_id, "start": start, "data_hex": "48656c6c6f"},
         request_id=23,
     )
     _call_tool(
         real_server,
-        "search.all_data",
+        "search_all_data",
         {
             "session_id": source_session_id,
             "start": start,
@@ -296,13 +296,13 @@ def test_session_bytes_existing_navigation_and_search(
     )
     _call_tool(
         real_server,
-        "search.next_constant",
+        "search_next_constant",
         {"session_id": source_session_id, "start": start, "constant": 1},
         request_id=25,
     )
     _call_tool(
         real_server,
-        "search.all_constant",
+        "search_all_constant",
         {
             "session_id": source_session_id,
             "start": start,
@@ -322,14 +322,14 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
     session_id = _open_rw(real_server, sample_binary_path, request_id=30)
     _call_tool(
         real_server,
-        "analysis.update_and_wait",
+        "analysis_update_and_wait",
         {"session_id": session_id},
         request_id=31,
     )
 
     functions = _call_tool(
         real_server,
-        "binary.functions",
+        "binary_functions",
         {"session_id": session_id, "offset": 0, "limit": 200},
         request_id=32,
     )
@@ -337,7 +337,7 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
 
     variables = _call_tool(
         real_server,
-        "function.variables",
+        "function_variables",
         {"session_id": session_id, "function_start": main_start},
         request_id=33,
     )
@@ -346,7 +346,7 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
     first_var_name = variables["structuredContent"]["items"][0]["name"]
     _call_tool(
         real_server,
-        "function.var_refs",
+        "function_var_refs",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -358,7 +358,7 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
 
     _call_tool(
         real_server,
-        "value.reg",
+        "value_reg",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -369,7 +369,7 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "value.stack",
+        "value_stack",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -381,7 +381,7 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "value.possible",
+        "value_possible",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -393,7 +393,7 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
 
     read = _call_tool(
         real_server,
-        "memory.read",
+        "memory_read",
         {"session_id": session_id, "address": main_start, "length": 4},
         request_id=38,
     )
@@ -401,7 +401,7 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
 
     too_large_read = _call_tool(
         real_server,
-        "memory.read",
+        "memory_read",
         {"session_id": session_id, "address": main_start, "length": 65537},
         request_id=381,
     )
@@ -410,26 +410,26 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
 
     _call_tool(
         real_server,
-        "memory.write",
+        "memory_write",
         {"session_id": session_id, "address": main_start, "data_hex": data_hex},
         request_id=39,
     )
     _call_tool(
         real_server,
-        "memory.insert",
+        "memory_insert",
         {"session_id": session_id, "address": int(main_start, 16) + 4, "data_hex": "00"},
         request_id=40,
     )
     _call_tool(
         real_server,
-        "memory.remove",
+        "memory_remove",
         {"session_id": session_id, "address": int(main_start, 16) + 4, "length": 1},
         request_id=41,
     )
 
     search = _call_tool(
         real_server,
-        "binary.search_text",
+        "binary_search_text",
         {"session_id": session_id, "query": "Hello", "limit": 5},
         request_id=42,
     )
@@ -437,26 +437,26 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
 
     _call_tool(
         real_server,
-        "data.typed_at",
+        "data_typed_at",
         {"session_id": session_id, "address": hello_addr},
         request_id=43,
     )
 
     _call_tool(
         real_server,
-        "annotation.rename_function",
+        "annotation_rename_function",
         {"session_id": session_id, "function_start": main_start, "new_name": "main_mcp_srv"},
         request_id=44,
     )
     _call_tool(
         real_server,
-        "annotation.rename_symbol",
+        "annotation_rename_symbol",
         {"session_id": session_id, "address": main_start, "new_name": "main_symbol_srv"},
         request_id=45,
     )
     _call_tool(
         real_server,
-        "annotation.define_symbol",
+        "annotation_define_symbol",
         {
             "session_id": session_id,
             "address": main_start,
@@ -467,20 +467,20 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "annotation.undefine_symbol",
+        "annotation_undefine_symbol",
         {"session_id": session_id, "address": main_start},
         request_id=47,
     )
 
     _call_tool(
         real_server,
-        "annotation.rename_data_var",
+        "annotation_rename_data_var",
         {"session_id": session_id, "address": hello_addr, "new_name": "hello_data_srv"},
         request_id=48,
     )
     _call_tool(
         real_server,
-        "annotation.define_data_var",
+        "annotation_define_data_var",
         {
             "session_id": session_id,
             "address": hello_addr,
@@ -492,26 +492,26 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "annotation.undefine_data_var",
+        "annotation_undefine_data_var",
         {"session_id": session_id, "address": hello_addr},
         request_id=50,
     )
 
     _call_tool(
         real_server,
-        "annotation.set_comment",
+        "annotation_set_comment",
         {"session_id": session_id, "address": main_start, "comment": "server comment"},
         request_id=51,
     )
     _call_tool(
         real_server,
-        "annotation.get_comment",
+        "annotation_get_comment",
         {"session_id": session_id, "address": main_start},
         request_id=52,
     )
     _call_tool(
         real_server,
-        "annotation.add_tag",
+        "annotation_add_tag",
         {
             "session_id": session_id,
             "address": main_start,
@@ -523,117 +523,117 @@ def test_values_memory_annotations_patch_and_undo_tools(  # noqa: PLR0915
     )
     _call_tool(
         real_server,
-        "annotation.get_tags",
+        "annotation_get_tags",
         {"session_id": session_id, "address": main_start},
         request_id=54,
     )
 
     _call_tool(
         real_server,
-        "metadata.store",
+        "metadata_store",
         {"session_id": session_id, "key": "mcp.key", "value": {"a": 1}},
         request_id=55,
     )
     _call_tool(
         real_server,
-        "metadata.query",
+        "metadata_query",
         {"session_id": session_id, "key": "mcp.key"},
         request_id=56,
     )
     _call_tool(
         real_server,
-        "metadata.remove",
+        "metadata_remove",
         {"session_id": session_id, "key": "mcp.key"},
         request_id=57,
     )
 
     _call_tool(
         real_server,
-        "patch.assemble",
+        "patch_assemble",
         {"session_id": session_id, "address": main_start, "asm": "nop"},
         request_id=58,
     )
     _call_tool(
         real_server,
-        "patch.status",
+        "patch_status",
         {"session_id": session_id, "address": main_start},
         request_id=59,
     )
     _call_tool(
         real_server,
-        "patch.convert_to_nop",
+        "patch_convert_to_nop",
         {"session_id": session_id, "address": main_start},
         request_id=60,
     )
     _call_tool(
         real_server,
-        "patch.always_branch",
+        "patch_always_branch",
         {"session_id": session_id, "address": int(main_start, 16) + 0x10},
         request_id=61,
     )
     _call_tool(
         real_server,
-        "patch.never_branch",
+        "patch_never_branch",
         {"session_id": session_id, "address": int(main_start, 16) + 0x10},
         request_id=62,
     )
     _call_tool(
         real_server,
-        "patch.invert_branch",
+        "patch_invert_branch",
         {"session_id": session_id, "address": int(main_start, 16) + 0x10},
         request_id=63,
     )
     _call_tool(
         real_server,
-        "patch.skip_and_return_value",
+        "patch_skip_and_return_value",
         {"session_id": session_id, "address": int(main_start, 16) + 0x10, "value": 7},
         request_id=64,
     )
 
     tx = _call_tool(
         real_server,
-        "undo.begin",
+        "undo_begin",
         {"session_id": session_id},
         request_id=65,
     )["structuredContent"]["transaction_id"]
     _call_tool(
         real_server,
-        "annotation.set_comment",
+        "annotation_set_comment",
         {"session_id": session_id, "address": main_start, "comment": "undo path"},
         request_id=66,
     )
     _call_tool(
         real_server,
-        "undo.revert",
+        "undo_revert",
         {"session_id": session_id, "transaction_id": tx},
         request_id=67,
     )
 
     tx2 = _call_tool(
         real_server,
-        "undo.begin",
+        "undo_begin",
         {"session_id": session_id},
         request_id=68,
     )["structuredContent"]["transaction_id"]
     _call_tool(
         real_server,
-        "annotation.set_comment",
+        "annotation_set_comment",
         {"session_id": session_id, "address": main_start, "comment": "undo commit"},
         request_id=69,
     )
     _call_tool(
         real_server,
-        "undo.commit",
+        "undo_commit",
         {"session_id": session_id, "transaction_id": tx2},
         request_id=70,
     )
-    _call_tool(real_server, "undo.undo", {"session_id": session_id}, request_id=71)
-    _call_tool(real_server, "undo.redo", {"session_id": session_id}, request_id=72)
+    _call_tool(real_server, "undo_undo", {"session_id": session_id}, request_id=71)
+    _call_tool(real_server, "undo_redo", {"session_id": session_id}, request_id=72)
 
     bndb_path = tmp_path / "hello-core-extra.bndb"
     created = _call_tool(
         real_server,
-        "database.create_bndb",
+        "database_create_bndb",
         {"session_id": session_id, "path": str(bndb_path)},
         request_id=73,
     )
@@ -647,7 +647,7 @@ def test_rebase_is_rejected_after_byte_edits_and_transport_survives(
     session_id = _open_rw(real_server, sample_binary_path, request_id=200)
     summary = _call_tool(
         real_server,
-        "binary.summary",
+        "binary_summary",
         {"session_id": session_id},
         request_id=201,
     )["structuredContent"]
@@ -655,20 +655,20 @@ def test_rebase_is_rejected_after_byte_edits_and_transport_survives(
 
     read_back = _call_tool(
         real_server,
-        "memory.read",
+        "memory_read",
         {"session_id": session_id, "address": start, "length": 4},
         request_id=202,
     )["structuredContent"]["data_hex"]
     _call_tool(
         real_server,
-        "memory.write",
+        "memory_write",
         {"session_id": session_id, "address": start, "data_hex": read_back},
         request_id=203,
     )
 
     rebased = _call_tool(
         real_server,
-        "loader.rebase",
+        "loader_rebase",
         {"session_id": session_id, "address": start},
         request_id=204,
     )
@@ -676,6 +676,6 @@ def test_rebase_is_rejected_after_byte_edits_and_transport_survives(
     assert "rebase is not allowed after byte edits" in rebased["structuredContent"]["error"]
 
     # Regression check: server remains responsive after the rejected rebase.
-    ping = _call_tool(real_server, "health.ping", request_id=205)
+    ping = _call_tool(real_server, "health_ping", request_id=205)
     assert ping["isError"] is False
     assert ping["structuredContent"]["status"] == "ok"

@@ -27,7 +27,7 @@ def _call_tool(
 def _open_analyzed(server: SimpleMcpServer, sample_binary_path: str) -> tuple[str, str]:
     opened = _call_tool(
         server,
-        "session.open",
+        "session_open",
         {
             "path": sample_binary_path,
             "update_analysis": False,
@@ -39,13 +39,13 @@ def _open_analyzed(server: SimpleMcpServer, sample_binary_path: str) -> tuple[st
     session_id = opened["session_id"]
     _call_tool(
         server,
-        "analysis.update_and_wait",
+        "analysis_update_and_wait",
         {"session_id": session_id},
         request_id=11,
     )
     functions = _call_tool(
         server,
-        "binary.functions",
+        "binary_functions",
         {"session_id": session_id, "offset": 0, "limit": 200},
         request_id=12,
     )["items"]
@@ -67,15 +67,15 @@ def test_core_tools_listed(real_server: SimpleMcpServer) -> None:
     assert listed is not None
     names = {tool["name"] for tool in listed["result"]["tools"]}
     expected = {
-        "value.flags_at",
-        "function.var_refs_from",
-        "function.ssa_var_def_use",
-        "function.ssa_memory_def_use",
-        "memory.reader_read",
-        "memory.writer_write",
-        "function.metadata_store",
-        "function.metadata_query",
-        "function.metadata_remove",
+        "value_flags_at",
+        "function_var_refs_from",
+        "function_ssa_var_def_use",
+        "function_ssa_memory_def_use",
+        "memory_reader_read",
+        "memory_writer_write",
+        "function_metadata_store",
+        "function_metadata_query",
+        "function_metadata_remove",
     }
     assert expected.issubset(names)
 
@@ -86,7 +86,7 @@ def test_core_tools_work(real_server: SimpleMcpServer, sample_binary_path: str) 
 
     il = _call_tool(
         real_server,
-        "il.function",
+        "il_function",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -104,13 +104,13 @@ def test_core_tools_work(real_server: SimpleMcpServer, sample_binary_path: str) 
 
     _call_tool(
         real_server,
-        "value.flags_at",
+        "value_flags_at",
         {"session_id": session_id, "function_start": main_start, "address": main_start},
         request_id=21,
     )
     _call_tool(
         real_server,
-        "function.var_refs_from",
+        "function_var_refs_from",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -122,14 +122,14 @@ def test_core_tools_work(real_server: SimpleMcpServer, sample_binary_path: str) 
 
     variables = _call_tool(
         real_server,
-        "function.variables",
+        "function_variables",
         {"session_id": session_id, "function_start": main_start},
         request_id=23,
     )
     var_name = variables["items"][0]["name"]
     _call_tool(
         real_server,
-        "function.ssa_var_def_use",
+        "function_ssa_var_def_use",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -141,7 +141,7 @@ def test_core_tools_work(real_server: SimpleMcpServer, sample_binary_path: str) 
     )
     _call_tool(
         real_server,
-        "function.ssa_memory_def_use",
+        "function_ssa_memory_def_use",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -153,7 +153,7 @@ def test_core_tools_work(real_server: SimpleMcpServer, sample_binary_path: str) 
 
     reader = _call_tool(
         real_server,
-        "memory.reader_read",
+        "memory_reader_read",
         {
             "session_id": session_id,
             "address": main_start_int,
@@ -165,7 +165,7 @@ def test_core_tools_work(real_server: SimpleMcpServer, sample_binary_path: str) 
     assert isinstance(reader["value"], int)
     writer = _call_tool(
         real_server,
-        "memory.writer_write",
+        "memory_writer_write",
         {
             "session_id": session_id,
             "address": main_start_int,
@@ -179,7 +179,7 @@ def test_core_tools_work(real_server: SimpleMcpServer, sample_binary_path: str) 
 
     stored = _call_tool(
         real_server,
-        "function.metadata_store",
+        "function_metadata_store",
         {
             "session_id": session_id,
             "function_start": main_start,
@@ -191,14 +191,14 @@ def test_core_tools_work(real_server: SimpleMcpServer, sample_binary_path: str) 
     assert stored["value"]["hello"] == "world"
     queried = _call_tool(
         real_server,
-        "function.metadata_query",
+        "function_metadata_query",
         {"session_id": session_id, "function_start": main_start, "key": "mcp.fn.key"},
         request_id=29,
     )
     assert queried["value"]["hello"] == "world"
     removed = _call_tool(
         real_server,
-        "function.metadata_remove",
+        "function_metadata_remove",
         {"session_id": session_id, "function_start": main_start, "key": "mcp.fn.key"},
         request_id=30,
     )
@@ -228,7 +228,7 @@ def test_unexpected_tool_exception_is_reported_and_server_survives(
         == "unexpected tool failure: RuntimeError: boom"
     )
 
-    ping = _call_tool(real_server, "health.ping", request_id=91)
+    ping = _call_tool(real_server, "health_ping", request_id=91)
     assert ping["status"] == "ok"
 
 
@@ -254,5 +254,5 @@ def test_non_json_tool_payload_is_wrapped_and_server_survives(
     assert payload["error"] == "tool returned a non-JSON-serializable payload"
     assert "Object of type object is not JSON serializable" in payload["detail"]
 
-    ping = _call_tool(real_server, "health.ping", request_id=93)
+    ping = _call_tool(real_server, "health_ping", request_id=93)
     assert ping["status"] == "ok"

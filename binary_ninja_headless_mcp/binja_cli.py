@@ -3,7 +3,7 @@
 ``binja_cli`` lets agents and shells that do not speak the MCP protocol drive *all* of the
 server's tools with plain commands::
 
-    binja_cli call binary.functions --session-id <id> --limit 50
+    binja_cli call binary_functions --session-id <id> --limit 50
 
 It is a thin layer over a ``dispatch(method, params) -> result`` abstraction with two backends:
 
@@ -52,7 +52,7 @@ EXIT_TOOL_ERROR = 1
 EXIT_USAGE = 2
 
 _DEFAULT_PROTOCOL = "2024-11-05"
-_OPEN_TOOLS = {"session.open", "session.open_bytes", "session.open_existing"}
+_OPEN_TOOLS = {"session_open", "session_open_bytes", "session_open_existing"}
 _PROTOCOL_ERROR_CODES = (-32700, -32600, -32601, -32602)
 
 # Cache for a single stdin read shared across all ``-`` value sources in one invocation.
@@ -783,7 +783,7 @@ def _run_batch_lines(stream: Any, args: argparse.Namespace, transport: Any) -> i
                         opened.append(session_id)
                     if not args.no_autosession:
                         last_session = session_id
-                if tool == "session.close":
+                if tool == "session_close":
                     closed = arguments.get("session_id")
                     if closed in opened:
                         opened.remove(closed)
@@ -810,7 +810,7 @@ def _run_batch_lines(stream: Any, args: argparse.Namespace, transport: Any) -> i
                 try:
                     result = transport.dispatch(
                         "tools/call",
-                        {"name": "session.close", "arguments": {"session_id": session_id}},
+                        {"name": "session_close", "arguments": {"session_id": session_id}},
                     )
                     if result.get("isError"):
                         raise RuntimeError(str(result.get("structuredContent")))

@@ -23,7 +23,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
         "'data_vars':len(bv.data_vars),'symbols':sum(len(x) for x in bv.symbols.values())}"
     )
     check(
-        "binary.summary",
+        "binary_summary",
         "fixture_identity",
         {},
         lambda p: (
@@ -43,7 +43,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
     }
     for group, fixture_predicate in pages.items():
         full = check(
-            "binary." + group,
+            "binary_" + group,
             "fixture_contents",
             {"limit": 10000},
             lambda p, g=group, pred=fixture_predicate: (
@@ -52,21 +52,21 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
             "Fixture item is present and total equals native enumeration",
         )
         check(
-            "binary." + group,
+            "binary_" + group,
             "pagination",
             {"offset": 1, "limit": 2},
             lambda p, full=full: p["items"] == full["items"][1:3] and p["total"] == full["total"],
             "Offset and limit select exact slice without changing total",
         )
     check(
-        "binary.get_function_at",
+        "binary_get_function_at",
         "known_function",
         {"address": start},
         lambda p: p["function"]["start"] == hex(start),
         "Lookup returns fixture function address",
     )
     check(
-        "binary.functions_at",
+        "binary_functions_at",
         "known_function",
         {"address": start},
         lambda p: any(x["start"] == hex(start) for x in p["items"]),
@@ -74,7 +74,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
     )
     block_starts = native(f"[b.start for b in bv.get_basic_blocks_at({start})]")
     check(
-        "binary.basic_blocks_at",
+        "binary_basic_blocks_at",
         "native_blocks",
         {"address": start},
         lambda p: [int(x["start"], 16) for x in p["items"]] == sorted(block_starts),
@@ -84,7 +84,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
         "[{'address':hex(a),'text':''.join(str(t) for t in ts)} "
         f"for ts,a in bv.get_function_at({start}).instructions]"
     )
-    for name in ("binary.get_function_disassembly_at", "disasm.function"):
+    for name in ("binary_get_function_disassembly_at", "disasm_function"):
         check(
             name,
             "native_instructions",
@@ -96,7 +96,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
             "Every disassembled instruction matches native address and text",
         )
     check(
-        "disasm.range",
+        "disasm_range",
         "bounded_instruction",
         {"start": start, "length": 1, "limit": 1},
         lambda p: (
@@ -107,14 +107,14 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
         "One-instruction range equals native disassembly at fixture entry",
     )
     linear = check(
-        "disasm.linear",
+        "disasm_linear",
         "nonempty_listing",
         {"limit": 10000},
         lambda p: any("cli_add" in str(x) for x in p["items"]),
         "Linear rendering includes named fixture function",
     )
     check(
-        "disasm.linear",
+        "disasm_linear",
         "pagination",
         {"offset": 2, "limit": 3},
         lambda p: p["items"] == linear["items"][2:5] and p["total"] == linear["total"],
@@ -137,21 +137,21 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
                 ] == expected
 
             check(
-                "il.function",
+                "il_function",
                 variant,
                 args,
                 il_equal,
                 "All IL instructions equal independent native enumeration",
             )
             check(
-                "binary.get_function_il_at",
+                "binary_get_function_il_at",
                 variant,
                 {"address": start, "level": level, "ssa": ssa},
                 il_equal,
                 "IL alias produces complete native instruction sequence",
             )
             check(
-                "il.function",
+                "il_function",
                 variant + "_page",
                 {**args, "offset": 1, "limit": 2},
                 lambda p, expected=expected: (
@@ -162,7 +162,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
             instruction = expected[0]
             address = int(instruction["address"], 16)
             check(
-                "il.instruction_by_addr",
+                "il_instruction_by_addr",
                 variant,
                 {**args, "address": address},
                 lambda p, i=instruction: (
@@ -173,14 +173,14 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
             )
             indices = sorted({i["index"] for i in expected if i["address"] == hex(address)})
             check(
-                "il.address_to_index",
+                "il_address_to_index",
                 variant,
                 {**args, "address": address},
                 lambda p, indices=indices: p["indices"] == indices,
                 "Address maps to exactly the native instruction indices",
             )
             check(
-                "il.index_to_address",
+                "il_index_to_address",
                 variant,
                 {**args, "index": instruction["index"]},
                 lambda p, address=address: p["address"] == hex(address),
@@ -191,7 +191,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
                 f"repr(getattr({expression}[{instruction['index']}], 'possible_values', None))"
             )
             check(
-                "value.possible",
+                "value_possible",
                 variant,
                 {**args, "address": address},
                 lambda p, possible=possible: (
@@ -211,7 +211,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
             f"(bv.get_function_at({start}).{getter}({start},{register!r}))"
         )
         check(
-            "value.reg",
+            "value_reg",
             variant,
             {"function_start": start, "address": start, "register": register, "after": after},
             lambda p, expected=expected: p["value"] == expected,
@@ -223,7 +223,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
             f"(bv.get_function_at({start}).{getter}({start},0,4))"
         )
         check(
-            "value.stack",
+            "value_stack",
             variant,
             {
                 "function_start": start,
@@ -246,7 +246,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
         "'written':[str(x) for x in f.get_flags_written_by_lifted_il_instruction(i.instr_index)]}"
     )
     check(
-        "value.flags_at",
+        "value_flags_at",
         "branch_flags",
         {"function_start": flag_address, "address": flag_data["address"]},
         lambda p: (
@@ -257,14 +257,14 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
 
     refs = native(f"[x.address for x in bv.get_code_refs({start})]")
     check(
-        "xref.code_refs_to",
+        "xref_code_refs_to",
         "fixture_caller",
         {"address": start},
         lambda p: sorted(int(x["from"], 16) for x in p["items"]) == sorted(refs) and bool(refs),
         "Known fixture function has real native call sites",
     )
     check(
-        "xref.code_refs_from",
+        "xref_code_refs_from",
         "reverse_call",
         {"address": refs[0]},
         lambda p: hex(start) in [x["to"] for x in p["items"]],
@@ -273,7 +273,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
     message = r.symbols["cli_message"]
     data_refs = native(f"list(bv.get_data_refs({message}))")
     check(
-        "xref.data_refs_to",
+        "xref_data_refs_to",
         "fixture_pointer",
         {"address": message},
         lambda p: (
@@ -282,7 +282,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
         "Fixture message has concrete native data references",
     )
     check(
-        "xref.data_refs_from",
+        "xref_data_refs_from",
         "reverse_pointer",
         {"address": data_refs[0]},
         lambda p: hex(message) in [x["to"] for x in p["items"]],
@@ -290,7 +290,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
     )
 
     pattern = b"BINJA_CLI_NATIVE_SENTINEL".hex()
-    for tool in ("search.data", "search.all_data"):
+    for tool in ("search_data", "search_all_data"):
         check(
             tool,
             "sentinel",
@@ -299,21 +299,21 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
             "Exact sentinel bytes resolve to message symbol",
         )
     check(
-        "search.next_data",
+        "search_next_data",
         "sentinel",
         {"data_hex": pattern, "start": facts["start"]},
         lambda p: p["found"] and p["address"] == hex(message),
         "First sentinel match equals message symbol",
     )
     check(
-        "binary.search_text",
+        "binary_search_text",
         "sentinel",
         {"query": "BINJA_CLI_NATIVE_SENTINEL"},
         lambda p: hex(message) in [x["address"] for x in p["items"]],
         "Raw text search resolves sentinel bytes to message symbol",
     )
     check(
-        "search.all_text",
+        "search_all_text",
         "symbol_text",
         {"query": "cli_add", "start": facts["start"], "end": facts["end"]},
         lambda p: p["count"] > 0 and any("cli_add" in str(x) for x in p["items"]),
@@ -321,14 +321,14 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
     )
     expected_text = native(f"bv.find_next_text({facts['start']}, 'cli_add')")
     check(
-        "search.next_text",
+        "search_next_text",
         "symbol_text",
         {"start": facts["start"], "query": "cli_add"},
         lambda p: p["found"] and p["address"] == hex(expected_text),
         "First text match equals native search result",
     )
     check(
-        "search.all_text",
+        "search_all_text",
         "regex",
         {"start": facts["start"], "end": facts["end"], "query": "cli_a[d]+", "regex": True},
         lambda p: p["count"] > 0,
@@ -341,14 +341,14 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
         f"bv.find_all_constant({facts['start']},{facts['end']},{constant})]"
     )
     check(
-        "search.all_constant",
+        "search_all_constant",
         "native_zero",
         {"start": facts["start"], "end": facts["end"], "constant": constant},
         lambda p: [int(x["address"], 16) for x in p["items"]] == matches[:100] and bool(matches),
         "Zero constant matches and result limit equal native rendered-token search",
     )
     check(
-        "search.next_constant",
+        "search_next_constant",
         "native_zero",
         {"start": facts["start"], "constant": constant},
         lambda p: p["found"] and p["address"] == hex(matches[0]),
@@ -356,7 +356,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
     )
 
     info = check(
-        "arch.info",
+        "arch_info",
         "native_arch",
         {},
         lambda p: (
@@ -370,14 +370,14 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
     for explicit in (False, True):
         args = {"arch_name": info["arch"]} if explicit else {}
         check(
-            "arch.assemble",
+            "arch_assemble",
             "explicit" if explicit else "view_arch",
             {"asm": "nop", **args},
             lambda p: p["data_hex"] == nop_hex and p["size"] == len(bytes.fromhex(nop_hex)),
             "NOP encoding matches native assembler exactly",
         )
         check(
-            "arch.disasm_bytes",
+            "arch_disasm_bytes",
             "explicit" if explicit else "view_arch",
             {"data_hex": nop_hex, **args},
             lambda p: p["text"].strip() == "nop" and p["length"] == len(bytes.fromhex(nop_hex)),
@@ -386,7 +386,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
     for mode in ("disabled", "interactive", "full"):
         for process in (False, True):
             check(
-                "transform.inspect",
+                "transform_inspect",
                 mode + ("_process" if process else "_inspect"),
                 {"mode": mode, "process": process},
                 lambda p, mode=mode, process=process: (
@@ -398,7 +398,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
                 "Native transform context preserves root and requested processing mode",
             )
             r.verify(
-                "transform.inspect",
+                "transform_inspect",
                 "path_" + mode + ("_process" if process else "_inspect"),
                 {"path": str(r.fixture), "mode": mode, "process": process},
                 lambda p, mode=mode, process=process: (
@@ -413,7 +413,7 @@ def run_reads(r):  # noqa: PLR0915 - ordered native coverage scenarios
             )
     # A transform context must never close the view borrowed from the MCP session.
     check(
-        "binary.summary",
+        "binary_summary",
         "after_transform_ownership",
         {},
         lambda p: p["function_count"] == facts["functions"],
@@ -431,7 +431,7 @@ def run_functions(r):
     fexpr = f"bv.get_function_at({start})"
     blocks = r.native(f"[(b.start,b.end) for b in {fexpr}.basic_blocks]")
     r.verify(
-        "function.basic_blocks",
+        "function_basic_blocks",
         "native_graph",
         common,
         lambda p: (
@@ -441,14 +441,14 @@ def run_functions(r):
         "Basic block ranges equal native CFG",
     )
     r.verify(
-        "function.callers",
+        "function_callers",
         "fixture_branch",
         common,
         lambda p: hex(branch) in [x["start"] for x in p["items"]],
         "cli_branch is a known caller of cli_add",
     )
     r.verify(
-        "function.callees",
+        "function_callees",
         "fixture_add",
         {**common, "function_start": branch},
         lambda p: hex(start) in [x["start"] for x in p["items"]],
@@ -456,7 +456,7 @@ def run_functions(r):
     )
     names = r.native(f"[v.name for v in {fexpr}.vars]")
     r.verify(
-        "function.variables",
+        "function_variables",
         "native_variables",
         common,
         lambda p: [x["name"] for x in p["items"]] == names and bool(names),
@@ -472,7 +472,7 @@ def run_functions(r):
         name, addresses = chosen
         args = {**common, "level": level}
         r.verify(
-            "function.var_refs",
+            "function_var_refs",
             level,
             {**args, "variable_name": name},
             lambda p, addresses=addresses: [int(x["address"], 16) for x in p["items"]] == addresses,
@@ -483,7 +483,7 @@ def run_functions(r):
             f"{fexpr}.get_{level}_var_refs_from({addresses[0]})]"
         )
         r.verify(
-            "function.var_refs_from",
+            "function_var_refs_from",
             level,
             {**args, "address": addresses[0]},
             lambda p, expected=expected: (
@@ -503,7 +503,7 @@ def run_functions(r):
             "'uses':[str(x) for x in uses]}"
         )
         r.verify(
-            "function.ssa_var_def_use",
+            "function_ssa_var_def_use",
             level,
             {**args, "variable_name": ssa["name"], "version": ssa["version"]},
             lambda p, ssa=ssa: (
@@ -519,7 +519,7 @@ def run_functions(r):
             "'uses':[str(x) for x in il.get_ssa_memory_uses(version)]}"
         )
         r.verify(
-            "function.ssa_memory_def_use",
+            "function_ssa_memory_def_use",
             level,
             {**args, "function_start": branch, "version": 0},
             lambda p, memory=memory: (
@@ -530,7 +530,7 @@ def run_functions(r):
         )
     address = r.symbols["cli_global"]
     r.verify(
-        "data.typed_at",
+        "data_typed_at",
         "global_value",
         {"session_id": r.session_id, "address": address},
         lambda p: p["data_var"]["address"] == hex(address) and p["data_var"]["value"] == 0x12345678,

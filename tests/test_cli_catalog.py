@@ -45,7 +45,7 @@ def test_catalog_defaults_match_effective_handler_arguments(spec):
     server = SimpleMcpServer(backend)
     schema = spec["inputSchema"]
     required = {key: _example(schema["properties"][key]) for key in schema.get("required", [])}
-    if spec["name"] == "transform.inspect":
+    if spec["name"] == "transform_inspect":
         required["path"] = "fixture"
     handler = server._tool_handlers[spec["name"]]
     handler(copy.deepcopy(required))
